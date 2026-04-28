@@ -4,7 +4,7 @@ import { buildStorefrontMetadata } from "@/src/lib/seo";
 
 export const metadata: Metadata = buildStorefrontMetadata({
   title: "Inicio",
-  description: "Descubre camisetas retro y streetwear futbolero en SwiftDrop.",
+  description: "Descubre repuestos automotrices de calidad con entrega ultrarapida en SwiftDrop.",
   path: "/",
 });
 

@@ -24,14 +24,14 @@ export function CatalogHero() {
               </span>
 
               <h1 className="mb-8 text-5xl font-normal md:text-8xl">
-                Catálogo
+                Catalogo
                 <br />
-                piezas para durar.
+                repuestos originales.
               </h1>
 
               <p className="mb-10 max-w-xl text-sm font-normal text-white/80 md:text-base">
-                Explora la selección completa y usa los filtros para encontrar tu fit: categoría,
-                tipo de prenda y orden por precio o novedades.
+                Explora la seleccion completa y usa los filtros para encontrar el repuesto que necesitas: categoria,
+                tipo de repuesto y orden por precio o novedades.
               </p>
 
               {/* <Button

@@ -11,8 +11,8 @@ export default function NotFound() {
         {/* Visual */}
         <div className="relative aspect-4/5 bg-[#f7f7f7]  overflow-hidden group">
           <img
-            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2040&auto=format&fit=crop"
-            alt="Fashion Editorial Error"
+            src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=2000&auto=format&fit=crop"
+            alt="Pagina no encontrada"
             className="w-full h-full object-cover grayscale opacity-60 group-hover:scale-105 transition-transform duration-1000"
           />
           <div className="absolute inset-0 flex items-center justify-center">

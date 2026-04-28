@@ -11,7 +11,7 @@ import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
 import { getAdminBootstrapSql, useAdminAccess } from "../client/useAdminAccess";
 import { formatCOP } from "@/src/shared/presentation/ui";
 
-const BOOT_KEY = "tribuna90_admin_booted_v1";
+const BOOT_KEY = "swiftdrop_admin_booted_v1";
 
 type InventoryRow = { stock_on_hand: number; low_stock_threshold: number };
 type VariantRow = { id: string; inventory_items: InventoryRow | InventoryRow[] | null };

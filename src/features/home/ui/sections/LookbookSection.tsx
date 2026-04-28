@@ -17,11 +17,11 @@ const fadeUp: Variants = {
   },
 };
 
-export function LookbookSection({ retroProducts = [] }: { retroProducts?: Product[] }) {
+export function LookbookSection({ repuestosDestacados = [] }: { repuestosDestacados?: Product[] }) {
   // Use first 3 products for the layout
-  const p1 = retroProducts[0];
-  const p2 = retroProducts[1];
-  const p3 = retroProducts[2];
+  const p1 = repuestosDestacados[0];
+  const p2 = repuestosDestacados[1];
+  const p3 = repuestosDestacados[2];
 
   return (
     <section className="px-3 md:px-3 mt-[3px]">
@@ -33,7 +33,7 @@ export function LookbookSection({ retroProducts = [] }: { retroProducts?: Produc
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          <span className="text-label text-muted-foreground font-grotesk">Archivo Retrô — 001</span>
+          <span className="text-label text-muted-foreground font-grotesk">Destacados — 001</span>
           <span className="text-micro text-accent font-mono-code">Disponible</span>
         </motion.div>
 
@@ -54,7 +54,7 @@ export function LookbookSection({ retroProducts = [] }: { retroProducts?: Produc
               />
               <div className="absolute inset-0 bg-black/50" />
               <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8">
-                <p className="text-micro text-white/60 mb-2">{p1.badge || "Edición Local"}</p>
+                <p className="text-micro text-white/60 mb-2">{p1.badge || "Repuesto Premium"}</p>
                 <h3 className="font-serif-display text-2xl md:text-3xl text-white">{p1.name}</h3>
                 <p className="text-sm text-white/80 mt-1">{formatCOP(p1.price)}</p>
               </div>
@@ -111,9 +111,9 @@ export function LookbookSection({ retroProducts = [] }: { retroProducts?: Produc
               </Link>
             ) : (
               <div className="h-full flex flex-col justify-end p-5 group cursor-pointer hover:bg-muted transition-colors duration-700">
-                <p className="text-micro text-muted-foreground font-grotesk mb-2">Próximamente</p>
-                <p className="font-serif-display text-lg text-secondary-foreground">Nuevas Curadurías</p>
-                <p className="font-grotesk text-xs text-muted-foreground mt-1">Archivo Retrô</p>
+                <p className="text-micro text-muted-foreground font-grotesk mb-2">Proximamente</p>
+                <p className="font-serif-display text-lg text-secondary-foreground">Nuevos Repuestos</p>
+                <p className="font-grotesk text-xs text-muted-foreground mt-1">Ofertas Especiales</p>
               </div>
             )}
           </motion.div>
@@ -129,21 +129,21 @@ export function LookbookSection({ retroProducts = [] }: { retroProducts?: Produc
         >
           <div>
             <p className="font-serif-display text-editorial text-foreground leading-[1.05]">
-              90s
+              Autopartes
             </p>
             <p className="font-serif-display text-editorial text-foreground italic leading-[1.05] mt-1">
-              Era
+              Premium
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground font-grotesk leading-relaxed">
-              Rescatamos la estética dorada del fútbol. Diseños que marcaron una época, curados para la cultura de hoy.
+              Seleccionamos los mejores repuestos automotrices. Productos de calidad, curados para el desempeno de tu vehiculo.
             </p>
             <Link
-              href="/catalog?sub=Camisetas%20Retro"
+              href="/catalog?cat=Motores"
               className="text-micro text-foreground font-grotesk border-b border-foreground/30 hover:border-foreground transition-colors mt-4 inline-block uppercase tracking-widest pb-1"
             >
-              Explorar Catálogo
+              Explorar Catalogo
             </Link>
           </div>
         </motion.div>

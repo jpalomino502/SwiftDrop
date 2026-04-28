@@ -31,12 +31,12 @@ export function FaqPage() {
             icon: Shield,
             questions: [
                 {
-                    q: "¿Qué calidad tienen las camisetas?",
-                    a: "Hablamos de calidad Premium (G5/Thai). Telas transpirables, escudos bordados de alta definición y etiquetas de época. Es el equilibrio perfecto entre la nostalgia de los 90 y la tecnología textil actual."
+                    q: "¿Qué calidad tienen los repuestos?",
+                    a: "Ofrecemos repuestos de calidad O.E.M (Original Equipment Manufacturer) y equivalentes certificados. Todos nuestros productos pasan control de calidad estricto antes de enviarlos. Garantizamos compatibilidad con modelos especificos de vehiculos."
                 },
                 {
-                    q: "¿Versión Fan o Versión Player?",
-                    a: "La versión 'Fan' tiene un corte clásico y cómodo para el día a día. La versión 'Player' es un corte atlético (ajustado), diseñada para el rendimiento en cancha. Si prefieres algo holgado en versión player, te recomendamos pedir una talla más."
+                    q: "¿Como se si el repuesto es compatible con mi auto?",
+                    a: "Cada producto tiene especificaciones detalladas de compatibilidad por marca y modelo. Puedes filtrar por vehiculo en el catalogo o contactar a nuestro equipo antes de comprar para confirmar."
                 }
             ]
         },
@@ -78,7 +78,7 @@ export function FaqPage() {
                                     frecuentes
                                 </h1>
                                 <p className="text-lg text-white/80 max-w-xl">
-                                    Resolvemos tus dudas sobre el Archivo 90s y nuestra logística de seguridad.
+                                    Resolvemos tus dudas sobre nuestros repuestos automotrices y nuestro sistema logistico multimodal.
                                 </p>
                             </div>
                         </div>

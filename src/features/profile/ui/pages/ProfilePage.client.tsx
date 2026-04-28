@@ -150,7 +150,7 @@ export function ProfilePage() {
       const avatar =
         typeof user?.user_metadata?.avatar_url === "string"
           ? user.user_metadata.avatar_url
-          : "https://i.pravatar.cc/150?u=tribuna90";
+          : "https://i.pravatar.cc/150?u=swiftdrop";
 
       return {
         name,

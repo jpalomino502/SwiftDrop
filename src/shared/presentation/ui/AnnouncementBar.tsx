@@ -16,12 +16,12 @@ export function AnnouncementBar({
     return (
         <div className="relative z-60 h-10 w-full bg-black text-white text-xs md:text-sm font-medium py-2 px-4 flex items-center justify-center">
             <div className="flex items-center gap-2 text-center uppercase tracking-wider">
-                <span>⚽️ Camisetas retro que son historia del fútbol</span>
+                <span>🚗 Repuestos automotrices con entrega ultrarapida</span>
                 <Link
-                    href="/catalog?cat=Camisetas&sub=Camisetas%20Retro"
+                    href="/catalog?cat=Motores"
                     className="underline underline-offset-4 font-bold hover:text-gray-300 transition-colors ml-1"
                 >
-                    DESCÚBRELAS AQUÍ
+                    EXPLORAR
                 </Link>
             </div>
             <button

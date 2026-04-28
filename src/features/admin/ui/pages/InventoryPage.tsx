@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
 import { getAdminBootstrapSql, useAdminAccess } from "../client/useAdminAccess";
 
-const BOOT_KEY = "tribuna90_admin_booted_v1";
+const BOOT_KEY = "swiftdrop_admin_booted_v1";
 
 type InventoryItemRow = {
     variant_id: string;

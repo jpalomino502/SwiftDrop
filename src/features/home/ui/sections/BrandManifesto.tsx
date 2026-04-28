@@ -19,7 +19,7 @@ export function BrandManifesto() {
                     viewport={{ once: true }}
                     transition={{ delay: 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                 >
-                    No vendemos solo camisetas.
+                    No vendemos solo repuestos.
                 </motion.h2>
 
                 <motion.h2
@@ -29,7 +29,7 @@ export function BrandManifesto() {
                     viewport={{ once: true }}
                     transition={{ delay: 0.35, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                 >
-                    Rescatamos historias.
+                    Mantienen tu vehiculo en movimiento.
                 </motion.h2>
 
                 <motion.div

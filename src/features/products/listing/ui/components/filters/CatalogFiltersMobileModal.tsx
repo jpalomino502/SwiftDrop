@@ -83,7 +83,7 @@ export function CatalogFiltersMobileModal({
           </div>
 
           <div>
-            <p className="text-sm font-normal text-foreground mb-3">Tipo de prenda</p>
+            <p className="text-sm font-normal text-foreground mb-3">Tipo de Repuesto</p>
             <div className="flex flex-wrap gap-2">
               {subcategories.map((sub) => (
                 <Button

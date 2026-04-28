@@ -26,7 +26,7 @@ export function SiteFooter({ categories = [] }: SiteFooterProps) {
                 <span className="font-(family-name:--font-bebas-neue) text-2xl tracking-wide">SwiftDrop</span>
               </Link>
               <p className="text-sm text-white/60 max-w-sm">
-                Moda contemporánea para quienes buscan un estilo auténtico y atemporal.
+                Repuestos automotrices de calidad con entrega rápida mediante drones, motos y bicicletas.
               </p>
             </div>
 

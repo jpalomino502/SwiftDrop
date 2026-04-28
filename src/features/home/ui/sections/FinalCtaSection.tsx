@@ -11,14 +11,14 @@ export function FinalCtaSection() {
           {/* Columna de Texto */}
           <div className="text-left">
             <h2 className="text-4xl md:text-5xl lg:text-6xl text-white mb-6 leading-tight tracking-tight">
-              Revive la gloria, <br />
+              Mantén tu auto, <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500">
-                viste la historia.
+                en perfecto estado.
               </span>
             </h2>
 
             <p className="text-lg text-zinc-400 mb-10 max-w-md leading-relaxed">
-              No te pierdas nuestros drops exclusivos de indumentaria retro y ofertas preventa solo para la comunidad de SwiftDrop.
+              Accede a repuestos automotrices de calidad con ofertas exclusivas y entregas ultrarrápidas con nuestro revolucionario sistema logístico multimodal.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -27,19 +27,19 @@ export function FinalCtaSection() {
                 size="lg"
                 className="bg-white"
               >
-                Explorar Joyas Retro
+                Explorar Catálogo
               </Button>
 
               <Button
                 as="a"
                 radius="full"
                 size="lg"
-                href="https://www.instagram.com/tribuna.noventa/"
+                href="https://www.instagram.com/swiftdrop/"
                 target="_blank"
                 className="bg-zinc-900 text-white"
               >
                 <Instagram className="w-5 h-5 text-pink-500" />
-                @tribuna.noventa
+                @swiftdrop
               </Button>
             </div>
           </div>
@@ -56,7 +56,7 @@ export function FinalCtaSection() {
                 </div>
 
                 <h3 className="text-white text-2xl mb-1 italic">SwiftDrop</h3>
-                <p className="text-zinc-500 text-sm mb-6 uppercase tracking-widest">Cultura de Grada</p>
+                <p className="text-zinc-500 text-sm mb-6 uppercase tracking-widest">Autopartes & Logística</p>
 
                 <div className="grid grid-cols-2 gap-4 w-full border-t border-white/10 pt-6">
                   {/* <div>

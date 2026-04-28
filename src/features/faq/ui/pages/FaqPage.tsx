@@ -41,16 +41,16 @@ export function FaqPage() {
             ]
         },
         {
-            category: "Garantía Tribuna",
+            category: "Garantía SwiftDrop",
             icon: HelpCircle,
             questions: [
                 {
-                    q: "¿Puedo cambiar mi camiseta si no me queda?",
-                    a: "Claro. Tienes 5 días desde la recepción para solicitar un cambio de talla. La prenda debe estar intacta, con sus etiquetas originales y sin rastro de uso en grada."
+                    q: "¿Puedo cambiar mi repuesto si llega defectuoso?",
+                    a: "Claro. Tienes 7 días desde la recepción para solicitar un cambio o devolución. El repuesto debe estar sin instalar, en su empaque original y sin daños físicos causados por el cliente."
                 },
                 {
-                    q: "¿Qué cubre la garantía?",
-                    a: "Cubre cualquier defecto de fábrica en costuras o estampados. Revisamos cada pieza del 'Archivo 90s' antes de enviarla, pero si algo falla, nos hacemos cargo del cambio total."
+                    q: "¿Qué cubre la garantía de los repuestos?",
+                    a: "Cubre cualquier defecto de fabricación. Todos nuestros repuestos son revisados antes de enviarse. Si algo falla por defecto de fábrica, nos hacemos cargo del cambio total del producto."
                 }
             ]
         }

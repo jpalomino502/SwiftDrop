@@ -293,7 +293,7 @@ export function CatalogFiltersSidebar({
               />
             }
           >
-            Tipo de prenda
+            Tipo de Repuesto
           </Button>
           {expandedFilter === "tipo" && (
             <div className="space-y-2">

@@ -75,8 +75,8 @@ export function Sidebar({ className }: { className?: string }) {
                 <div className="flex h-full flex-col px-6 py-8">
                     <div className="mb-12 px-2">
                         <Link href="/admin" className="inline-flex items-center gap-3">
-                            <img src="/logo.png" alt="Tribuna 90" width={44} height={44} />
-                            <h1 className="text-xl font-normal ">Tribuna 90</h1>
+                            <img src="/logo.png" alt="SwiftDrop" width={44} height={44} />
+                            <h1 className="text-xl font-normal ">SwiftDrop</h1>
                         </Link>
                     </div>
 

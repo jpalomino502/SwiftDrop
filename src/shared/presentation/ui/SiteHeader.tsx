@@ -37,7 +37,7 @@ function formatCurrency(value: number) {
 }
 
 export function SiteHeader({
-  brandName = "Tribuna 90",
+  brandName = "SwiftDrop",
   cartCount = 0,
   onCartClick,
   initialUser = null,

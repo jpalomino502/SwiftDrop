@@ -6,7 +6,7 @@ export function PrivacyPage() {
     return (
         <LegalLayout title="Política de Privacidad" updateDate="24 de Enero, 2024">
             <p>
-                En Tribuna 90, nos tomamos muy en serio tu privacidad. Esta política describe cómo recopilamos, usamos y protegemos
+                En SwiftDrop, nos tomamos muy en serio tu privacidad. Esta política describe cómo recopilamos, usamos y protegemos
                 tu información personal cuando visitas nuestro sitio web.
             </p>
 

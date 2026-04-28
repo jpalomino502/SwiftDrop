@@ -22,8 +22,8 @@ export function SiteFooter({ categories = [] }: SiteFooterProps) {
                 href="/"
                 className="mb-4 inline-flex items-center gap-3 text-lg md:text-xl"
               >
-                <img src="/logo.png" alt="Tribuna 90" width={44} height={44} />
-                <span className="font-(family-name:--font-bebas-neue) text-2xl tracking-wide">Tribuna 90</span>
+                <img src="/logo.png" alt="SwiftDrop" width={44} height={44} />
+                <span className="font-(family-name:--font-bebas-neue) text-2xl tracking-wide">SwiftDrop</span>
               </Link>
               <p className="text-sm text-white/60 max-w-sm">
                 Moda contemporánea para quienes buscan un estilo auténtico y atemporal.
@@ -87,7 +87,7 @@ export function SiteFooter({ categories = [] }: SiteFooterProps) {
           {/* Bottom */}
           <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4 border-t border-white/10 pt-8 text-center md:text-left">
             <p className="text-xs text-neutral-500">
-              © 2026 Tribuna 90. Todos los derechos reservados.
+              © 2026 SwiftDrop. Todos los derechos reservados.
             </p>
 
             <div className="flex gap-6">

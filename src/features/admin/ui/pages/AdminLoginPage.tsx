@@ -113,7 +113,7 @@ export function AdminLoginPage() {
         <section className="flex items-center justify-center px-4 py-10 sm:px-8">
           <Card className="w-full max-w-md border border-white/10 bg-white text-neutral-900 shadow-2xl">
             <CardHeader className="flex flex-col items-center gap-4 px-7 pt-8">
-              <img src="/logo.png" alt="Tribuna 90" className="h-14 w-14 object-contain" />
+              <img src="/logo.png" alt="SwiftDrop" className="h-14 w-14 object-contain" />
               <div className="text-center">
                 <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500">Admin Access</p>
                 <h1 className="mt-2 text-3xl font-semibold text-neutral-900">Inicia sesion</h1>

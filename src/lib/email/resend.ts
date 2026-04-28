@@ -44,7 +44,7 @@ function getFromAddress() {
   return (
     process.env.RESEND_FROM_EMAIL ??
     process.env.RESEND_FROM ??
-    "Tribuna 90 <onboarding@tribunanoventa.shop>"
+    "SwiftDrop <onboarding@tribunanoventa.shop>"
   );
 }
 
@@ -254,7 +254,7 @@ export async function sendOrderConfirmationEmail(input: SendOrderConfirmationInp
     const { error } = await resend.emails.send({
       from: getFromAddress(),
       to: toEmail,
-      subject: `Confirmacion de pedido ${orderLabel} | Tribuna 90`,
+      subject: `Confirmacion de pedido ${orderLabel} | SwiftDrop`,
       html,
       text: textLines.join("\n"),
     });

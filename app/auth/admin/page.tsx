@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Administrador - Tribuna 90",
+  title: "Administrador - SwiftDrop",
   description: "Panel de administración",
 };
 

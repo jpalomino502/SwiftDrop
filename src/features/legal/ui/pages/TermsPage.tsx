@@ -6,7 +6,7 @@ export function TermsPage() {
     return (
         <LegalLayout title="Términos y Condiciones" updateDate="24 de Enero, 2024">
             <p>
-                Bienvenido a Tribuna 90. Al acceder y utilizar nuestro sitio web, aceptas cumplir con los siguientes términos y condiciones.
+                Bienvenido a SwiftDrop. Al acceder y utilizar nuestro sitio web, aceptas cumplir con los siguientes términos y condiciones.
                 Por favor, léelos detenidamente antes de realizar cualquier compra.
             </p>
 

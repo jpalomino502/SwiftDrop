@@ -51,7 +51,7 @@ export function FinalCtaSection() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5  flex flex-col items-center justify-center p-8 text-center rotate-3 hover:rotate-0 transition-transform duration-500 shadow-2xl">
                 <div className="w-20 h-20 bg-gradient-to-tr from-orange-400 via-pink-500 to-purple-500 rounded-full p-1 mb-6">
                   <div className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
-                    <img src="/logo.png" alt="Tribuna 90" />
+                    <img src="/logo.png" alt="SwiftDrop" />
                   </div>
                 </div>
 

@@ -1,4 +1,4 @@
--- Tribuna 90 — Supabase/Postgres schema (ecommerce)
+-- SwiftDrop — Supabase/Postgres schema (ecommerce)
 
 begin;
 

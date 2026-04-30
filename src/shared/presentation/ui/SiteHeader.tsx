@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Accordion, AccordionItem, Avatar, Button, Input } from "@heroui/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Avatar, Button, Input } from "@heroui/react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, Search, ShoppingBag, Heart, X } from "lucide-react";
 
 import { AuthModal } from "@/src/features/auth";
@@ -41,7 +41,7 @@ export function SiteHeader({
   cartCount = 0,
   onCartClick,
   initialUser = null,
-  initialCategories = [],
+  initialCategories = [], // Se mantiene la prop por si el layout la envía, aunque no se dibuje
   className,
 }: SiteHeaderProps & { className?: string }) {
   const router = useRouter();
@@ -58,12 +58,9 @@ export function SiteHeader({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [user, setUser] = useState<ServerUserSnapshot | null>(initialUser);
-  const [categories] = useState<HeaderCategoryNode[]>(initialCategories);
   const [scrolled, setScrolled] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearchHovered, setIsSearchHovered] = useState(false);
-
-  const isHome = pathname === "/";
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -126,15 +123,6 @@ export function SiteHeader({
 
   const isLoggedIn = !!user?.email;
   const isSearchExpanded = searchValue.length > 0 || isSuggestionsOpen || isSearchHovered || isSearchFocused;
-
-  const activeCategory = searchParams.get("cat");
-  const activeSubcategory = searchParams.get("sub");
-
-  const activeRoot = useMemo(() => {
-    if (pathname !== "/catalog") return null;
-    if (!activeCategory) return null;
-    return categories.find((c) => c.name === activeCategory) ?? null;
-  }, [activeCategory, categories, pathname]);
 
   useEffect(() => {
     function onDocumentPointerDown(event: PointerEvent) {
@@ -216,84 +204,37 @@ export function SiteHeader({
             <span className="text-2xl pt-1 font-(family-name:--font-bebas-neue) transition-colors text-black">{brandName}</span>
           </Link>
 
-          <nav className={`hidden flex-1 items-center justify-center gap-4 lg:gap-6 text-sm font-medium md:flex transition-opacity duration-300 ${isSearchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+          {/* MENÚ PRINCIPAL DESKTOP REESTRUCTURADO */}
+          <nav className={`hidden flex-1 items-center justify-center gap-4 lg:gap-8 text-sm font-medium md:flex transition-opacity duration-300 ${isSearchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
             <Link
               href="/catalog"
-              className={`px-3 py-2 text-md uppercase transition-colors ${pathname === "/catalog" && !activeCategory && !activeSubcategory
+              className={`px-3 py-2 text-md uppercase transition-colors ${pathname === "/catalog"
                 ? "text-black font-bold"
                 : "text-gray-600 hover:text-black"
                 }`}
             >
-              Todo
+              Catálogo
             </Link>
 
-            {categories.slice(0, 4).map((c) => {
-              const href = `/catalog?cat=${encodeURIComponent(c.name)}`;
-              const active = pathname === "/catalog" && activeCategory === c.name;
-              const hasChildren = c.children.length > 0;
+            <Link
+              href="/faq"
+              className={`px-3 py-2 text-md uppercase transition-colors ${pathname === "/faq"
+                ? "text-black font-bold"
+                : "text-gray-600 hover:text-black"
+                }`}
+            >
+              FAQ
+            </Link>
 
-              return (
-                <div key={c.id} className="group">
-                  <Link
-                    href={href}
-                    className={`inline-flex items-center px-3 py-2 text-md uppercase text-center transition-colors ${active
-                      ? "text-black font-bold"
-                      : "text-gray-600 hover:text-black"
-                      }`}
-                    aria-haspopup={hasChildren ? "menu" : undefined}
-                    aria-expanded={hasChildren ? false : undefined}
-                  >
-                    {c.name}
-                  </Link>
-
-                  {hasChildren ? (
-                    <div
-                      className="invisible absolute left-1/2 top-full z-50 w-screen -translate-x-1/2 -mt-5 pt-5 opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100"
-                      role="menu"
-                    >
-                      <div className="border-t border-black/5 bg-white shadow-xl">
-                        <div className="mx-auto grid max-w-7xl grid-cols-12 gap-8 px-4 py-8 sm:px-6 lg:px-8">
-                          <div className="col-span-3">
-                            <h3 className="mb-4 text-lg font-bold text-black">{c.name}</h3>
-                            <Link
-                              href={href}
-                              className="mb-2 block text-sm font-medium text-gray-900 underline decoration-gray-400 underline-offset-4 hover:text-black hover:decoration-black"
-                            >
-                              Ver todo
-                            </Link>
-                          </div>
-
-                          <div className="col-span-9 grid grid-cols-3 gap-8 border-l border-gray-100 pl-8">
-                            {["Destacados", "Novedades", "Colecciones"].map((title, i) => {
-                              const items = c.children.filter((_, idx) => idx % 3 === i);
-                              if (items.length === 0) return null;
-                              return (
-                                <div key={i} className="flex flex-col gap-3">
-                                  <h4 className="text-xs font-semibold uppercase  text-gray-500">
-                                    {title}
-                                  </h4>
-                                  <div className="flex flex-col gap-2">
-                                    {items.map((sub) => (
-                                      <Link
-                                        key={sub.id}
-                                        href={`/catalog?cat=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sub.name)}`}
-                                        className="text-sm text-gray-600 hover:text-black hover:underline hover:underline-offset-4"
-                                      >
-                                        {sub.name}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
+            <Link
+              href="/about"
+              className={`px-3 py-2 text-md uppercase transition-colors ${pathname === "/about"
+                ? "text-black font-bold"
+                : "text-gray-600 hover:text-black"
+                }`}
+            >
+              Nosotros
+            </Link>
           </nav>
 
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
@@ -517,49 +458,30 @@ export function SiteHeader({
               </button>
             </div>
 
-            {/* Contenido del menú */}
+            {/* Contenido del menú - MÓVIL REESTRUCTURADO */}
             <div className="flex-1 overflow-y-auto">
               <div className="flex w-full flex-col gap-0 px-0">
                 <Link
                   href="/catalog"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-base font-semibold border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-4 text-base font-semibold border-b border-gray-100 hover:bg-gray-50 transition-colors"
                 >
-                  Todo
+                  Catálogo
                 </Link>
-
-                <Accordion
-                  selectionMode="single"
-                  className="w-full px-0"
-                  itemClasses={{
-                    title: "px-4 py-3 text-base font-semibold hover:bg-gray-50",
-                    trigger: "justify-start data-[open=true]:bg-gray-50",
-                    content: "flex flex-col gap-0 pb-0 px-0",
-                    base: "border-b border-gray-100"
-                  }}
+                <Link
+                  href="/faq"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-6 py-4 text-base font-semibold border-b border-gray-100 hover:bg-gray-50 transition-colors"
                 >
-                  {categories.slice(0, 10).map((c) => (
-                    <AccordionItem key={c.id} aria-label={c.name} title={c.name}>
-                      <Link
-                        href={`/catalog?cat=${encodeURIComponent(c.name)}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-6 py-2 text-sm font-medium text-black bg-gray-50 hover:bg-gray-100 transition-colors"
-                      >
-                        Ver todo
-                      </Link>
-                      {c.children.slice(0, 12).map((sub) => (
-                        <Link
-                          key={sub.id}
-                          href={`/catalog?cat=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sub.name)}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block px-8 py-2 text-sm text-gray-700 hover:text-black hover:bg-gray-100 transition-colors"
-                        >
-                          {sub.name}
-                        </Link>
-                      ))}
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                  Preguntas Frecuentes (FAQ)
+                </Link>
+                <Link
+                  href="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-6 py-4 text-base font-semibold border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  Sobre Nosotros
+                </Link>
               </div>
             </div>
 

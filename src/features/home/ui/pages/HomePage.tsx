@@ -11,10 +11,8 @@ import { getProducts } from "@/src/features/products/server/getProducts";
 export async function HomePage() {
   const products = await getProducts(50).catch(() => []);
 
-  const repuestosDestacados = products.filter(p =>
-    p.subcategory === "Motores" ||
-    p.allSubcategories?.includes("Motores")
-  ).slice(0, 3);
+  // Take first 3 products for the lookbook section
+  const repuestosDestacados = products.slice(0, 3);
 
   return (
     <div>

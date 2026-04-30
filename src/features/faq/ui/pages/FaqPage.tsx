@@ -65,12 +65,8 @@ export function FaqPage() {
             {/* Hero Section */}
             <div className="px-0 md:px-12">
                 <section className="w-full">
-                    <div className="relative h-[50vh] overflow-hidden md:">
-                        <img
-                            src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&auto=format&fit=crop&q=80"
-                            alt="FAQ Hero"
-                            className="absolute inset-0 h-full w-full object-cover brightness-[0.7]"
-                        />
+                    <div className="relative h-[50vh] overflow-hidden bg-black">
+                        
                         <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-8 md:px-12 text-white">
                             <div className="max-w-3xl">
                                 <h1 className="mb-8 text-5xl md:text-7xl">

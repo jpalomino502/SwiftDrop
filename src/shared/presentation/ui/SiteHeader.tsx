@@ -63,7 +63,6 @@ export function SiteHeader({
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearchHovered, setIsSearchHovered] = useState(false);
 
-
   const isHome = pathname === "/";
 
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -136,7 +135,6 @@ export function SiteHeader({
     if (!activeCategory) return null;
     return categories.find((c) => c.name === activeCategory) ?? null;
   }, [activeCategory, categories, pathname]);
-
 
   useEffect(() => {
     function onDocumentPointerDown(event: PointerEvent) {
@@ -211,13 +209,14 @@ export function SiteHeader({
       <header
         className={`sticky z-50 w-full transition-all duration-300 bg-white ${scrolled ? "py-3" : "py-4"} ${className ?? "top-0"}`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="inline-flex items-center gap-2 whitespace-nowrap">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          
+          <Link href="/" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap">
             <img src="/logo.png" alt={brandName} width={40} height={40} className="w-10 h-10 object-contain" />
             <span className="text-2xl pt-1 font-(family-name:--font-bebas-neue) transition-colors text-black">{brandName}</span>
           </Link>
 
-          <nav className={`hidden absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-medium md:flex transition-opacity duration-300 ${isSearchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+          <nav className={`hidden flex-1 items-center justify-center gap-4 lg:gap-6 text-sm font-medium md:flex transition-opacity duration-300 ${isSearchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
             <Link
               href="/catalog"
               className={`px-3 py-2 text-md uppercase transition-colors ${pathname === "/catalog" && !activeCategory && !activeSubcategory
@@ -228,7 +227,7 @@ export function SiteHeader({
               Todo
             </Link>
 
-            {categories.slice(0, 7).map((c) => {
+            {categories.slice(0, 4).map((c) => {
               const href = `/catalog?cat=${encodeURIComponent(c.name)}`;
               const active = pathname === "/catalog" && activeCategory === c.name;
               const hasChildren = c.children.length > 0;
@@ -237,7 +236,7 @@ export function SiteHeader({
                 <div key={c.id} className="group">
                   <Link
                     href={href}
-                    className={`inline-flex items-center px-3 py-2 text-md uppercase transition-colors ${active
+                    className={`inline-flex items-center px-3 py-2 text-md uppercase text-center transition-colors ${active
                       ? "text-black font-bold"
                       : "text-gray-600 hover:text-black"
                       }`}
@@ -297,7 +296,7 @@ export function SiteHeader({
             })}
           </nav>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <div className="hidden sm:block">
               <div
                 className="relative group"
@@ -504,86 +503,103 @@ export function SiteHeader({
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-60 bg-white flex flex-col items-center justify-center gap-8 text-xl">
-          <button
-            aria-label="Cerrar menú"
-            onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-6 right-6"
-          >
-            <X size={24} strokeWidth={1} />
-          </button>
-
-          <div className="flex w-full max-w-sm flex-col items-center gap-4 px-4 overflow-y-auto max-h-[80vh]">
-            <Link
-              href="/catalog"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium py-2"
-            >
-              Todo
-            </Link>
-
-            <Accordion
-              selectionMode="multiple"
-              className="w-full"
-              itemClasses={{
-                title: "text-center font-medium",
-                trigger: "justify-center",
-                content: "flex flex-col items-center gap-3 pb-6"
-              }}
-            >
-              {categories.slice(0, 10).map((c) => (
-                <AccordionItem key={c.id} aria-label={c.name} title={c.name}>
-                  <Link
-                    href={`/catalog?cat=${encodeURIComponent(c.name)}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="font-medium text-black underline underline-offset-4"
-                  >
-                    Ver todo {c.name}
-                  </Link>
-                  {c.children.slice(0, 12).map((sub) => (
-                    <Link
-                      key={sub.id}
-                      href={`/catalog?cat=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sub.name)}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-base text-gray-600"
-                    >
-                      {sub.name}
-                    </Link>
-                  ))}
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-
-          {!isLoggedIn ? (
-            <button
-              onClick={() => {
-                setAuthModalOpen(true);
-                setMobileMenuOpen(false);
-              }}
-              className="mt-4 rounded-full bg-black px-6 py-2 text-white text-base"
-            >
-              Iniciar sesión
-            </button>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <Avatar
-                size="md"
-                name={user?.email ?? "Cuenta"}
-                src={typeof user?.avatar_url === "string" ? user.avatar_url : undefined}
-              />
+        <div className="fixed inset-0 z-60 bg-white overflow-hidden">
+          <div className="flex flex-col h-full">
+            {/* Header del menú mobile */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <span className="text-lg font-bold text-black">Menú</span>
               <button
-                onClick={async () => {
-                  const supabase = getSupabaseBrowserClient();
-                  await supabase?.auth.signOut();
-                  setMobileMenuOpen(false);
-                }}
-                className="rounded-full border border-gray-200 px-6 py-2 text-base hover:bg-gray-50"
+                aria-label="Cerrar menú"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                Cerrar sesión
+                <X size={24} strokeWidth={1.5} />
               </button>
             </div>
-          )}
+
+            {/* Contenido del menú */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex w-full flex-col gap-0 px-0">
+                <Link
+                  href="/catalog"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 text-base font-semibold border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  Todo
+                </Link>
+
+                <Accordion
+                  selectionMode="single"
+                  className="w-full px-0"
+                  itemClasses={{
+                    title: "px-4 py-3 text-base font-semibold hover:bg-gray-50",
+                    trigger: "justify-start data-[open=true]:bg-gray-50",
+                    content: "flex flex-col gap-0 pb-0 px-0",
+                    base: "border-b border-gray-100"
+                  }}
+                >
+                  {categories.slice(0, 10).map((c) => (
+                    <AccordionItem key={c.id} aria-label={c.name} title={c.name}>
+                      <Link
+                        href={`/catalog?cat=${encodeURIComponent(c.name)}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-6 py-2 text-sm font-medium text-black bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        Ver todo
+                      </Link>
+                      {c.children.slice(0, 12).map((sub) => (
+                        <Link
+                          key={sub.id}
+                          href={`/catalog?cat=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(sub.name)}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-8 py-2 text-sm text-gray-700 hover:text-black hover:bg-gray-100 transition-colors"
+                        >
+                          {sub.name}
+                        </Link>
+                      ))}
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+
+            {/* Footer del menú */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50">
+              {!isLoggedIn ? (
+                <Button
+                  fullWidth
+                  onClick={() => {
+                    setAuthModalOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="bg-black text-white font-semibold hover:bg-gray-800 rounded-lg h-10"
+                >
+                  Iniciar sesión
+                </Button>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <Avatar
+                    size="md"
+                    name={user?.email ?? "Cuenta"}
+                    src={typeof user?.avatar_url === "string" ? user.avatar_url : undefined}
+                  />
+                  <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-black hover:underline">
+                    Mi cuenta
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      const supabase = getSupabaseBrowserClient();
+                      await supabase?.auth.signOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

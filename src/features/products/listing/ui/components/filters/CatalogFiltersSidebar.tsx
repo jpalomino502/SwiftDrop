@@ -44,10 +44,10 @@ export function CatalogFiltersSidebar({
   onSetExpandedFilter: (value: string | null) => void;
 }) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const minPriceDisplay = Math.round(minPrice / 100);
-  const maxPriceDisplay = Math.round(maxPrice / 100);
-  const rangeMinDisplay = Math.round(priceRange[0] / 100);
-  const rangeMaxDisplay = Math.round(priceRange[1] / 100);
+  const minPriceDisplay = Math.round(minPrice * 10);
+  const maxPriceDisplay = Math.round(maxPrice * 10);
+  const rangeMinDisplay = Math.round(priceRange[0] * 10);
+  const rangeMaxDisplay = Math.round(priceRange[1] * 10);
 
   // Auto-expand selected category
   useEffect(() => {
@@ -184,7 +184,7 @@ export function CatalogFiltersSidebar({
                   labelPlacement="outside"
                   value={String(rangeMinDisplay)}
                   onChange={(e) =>
-                    onPriceRangeChange(clampRange([Number(e.target.value) * 100, priceRange[1]]))
+                    onPriceRangeChange(clampRange([Number(e.target.value) * 10, priceRange[1]]))
                   }
                   min={minPriceDisplay}
                   max={maxPriceDisplay}
@@ -198,7 +198,7 @@ export function CatalogFiltersSidebar({
                   labelPlacement="outside"
                   value={String(rangeMaxDisplay)}
                   onChange={(e) =>
-                    onPriceRangeChange(clampRange([priceRange[0], Number(e.target.value) * 100]))
+                    onPriceRangeChange(clampRange([priceRange[0], Number(e.target.value) * 10]))
                   }
                   min={minPriceDisplay}
                   max={maxPriceDisplay}
@@ -214,7 +214,7 @@ export function CatalogFiltersSidebar({
                   max={maxPriceDisplay}
                   value={rangeMinDisplay}
                   onChange={(e) =>
-                    onPriceRangeChange(clampRange([Number(e.target.value) * 100, priceRange[1]]))
+                    onPriceRangeChange(clampRange([Number(e.target.value) * 10, priceRange[1]]))
                   }
                   className="w-full accent-foreground"
                   aria-label="Precio mínimo"
@@ -225,7 +225,7 @@ export function CatalogFiltersSidebar({
                   max={maxPriceDisplay}
                   value={rangeMaxDisplay}
                   onChange={(e) =>
-                    onPriceRangeChange(clampRange([priceRange[0], Number(e.target.value) * 100]))
+                    onPriceRangeChange(clampRange([priceRange[0], Number(e.target.value) * 10]))
                   }
                   className="w-full accent-foreground"
                   aria-label="Precio máximo"

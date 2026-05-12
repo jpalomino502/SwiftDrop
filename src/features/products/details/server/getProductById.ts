@@ -35,12 +35,26 @@ export async function getProductById(productId: number): Promise<Product | null>
 
     const attributes = (data.attributes ?? {}) as Record<string, unknown>;
 
+    // Validate image URL (must start with http/https and not be malformed)
+    const isValidImageUrl = (url: string): boolean => {
+      if (!url || typeof url !== "string") return false;
+      const trimmed = url.trim();
+      if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) return false;
+      // Check for common malformed URLs (e.g., 'ttps://' missing 'h')
+      if (trimmed.toLowerCase().startsWith("ttp://") || trimmed.toLowerCase().startsWith("ttps://")) return false;
+      // Basic URL format check - must have at least domain and extension
+      const urlPattern = /^https?:\/\/.+\..+/i;
+      return urlPattern.test(trimmed);
+    };
+
     // Build images array: primary image plus any product_images rows
     const images: string[] = [];
-    if (typeof data.primary_image_url === "string" && data.primary_image_url) images.push(data.primary_image_url);
+    if (data.primary_image_url && isValidImageUrl(data.primary_image_url)) {
+      images.push(data.primary_image_url);
+    }
     if (Array.isArray(data.product_images)) {
       for (const r of data.product_images as Array<{ url?: string }>) {
-        if (r && typeof r.url === "string" && r.url) {
+        if (r && typeof r.url === "string" && r.url && isValidImageUrl(r.url)) {
           // Avoid duplicate of primary
           if (!images.includes(r.url)) images.push(r.url);
         }

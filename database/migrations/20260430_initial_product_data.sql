@@ -1,4 +1,4 @@
--- SwiftDrop: Initial Product Catalog & Data Seed
+
 -- Migration: Insert categories, products, variants, images, and inventory
 -- Date: 2026-04-30
 
@@ -442,15 +442,15 @@ ON CONFLICT DO NOTHING;
 
 -- Baterías
 INSERT INTO public.product_images (product_id, url, alt_text, position)
-SELECT id, 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500&h=500&fit=crop', 'Batería Bosch 12V 65Ah', 0 FROM products WHERE slug = 'bateria-12v-65ah-bosch' ON CONFLICT DO NOTHING;
+SELECT id, 'https://http2.mlstatic.com/D_NQ_NP_713101-MCO95984260660_102025-O.webp', 'Batería Bosch 12V 65Ah', 0 FROM products WHERE slug = 'bateria-12v-65ah-bosch' ON CONFLICT DO NOTHING;
 INSERT INTO public.product_images (product_id, url, alt_text, position)
-SELECT id, 'https://images.unsplash.com/photo-1630630889253-05266bff8636?w=500&h=500&fit=crop', 'Batería Exell 12V 70Ah', 0 FROM products WHERE slug = 'bateria-12v-70ah-exell' ON CONFLICT DO NOTHING;
+SELECT id, 'https://images.tcdn.com.br/img/img_prod/1039998/180_bateria_excell_evolution_exf_70nd_12v_70ah_com_troca_393_1_17877f74a47856ece6aa1ac369f646b2.jpg', 'Batería Exell 12V 70Ah', 0 FROM products WHERE slug = 'bateria-12v-70ah-exell' ON CONFLICT DO NOTHING;
 INSERT INTO public.product_images (product_id, url, alt_text, position)
-SELECT id, 'https://images.unsplash.com/photo-1593642632512-d5e70acf4f71?w=500&h=500&fit=crop', 'Batería AC Delco 12V 55Ah', 0 FROM products WHERE slug = 'bateria-12v-55ah-ac' ON CONFLICT DO NOTHING;
+SELECT id, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtJ1x3dCzTk--wEnTDgVftLu_bpEM3HnGGIw&s', 'Batería AC Delco 12V 55Ah', 0 FROM products WHERE slug = 'bateria-12v-55ah-ac' ON CONFLICT DO NOTHING;
 INSERT INTO public.product_images (product_id, url, alt_text, position)
-SELECT id, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop', 'Batería Trojan 12V 100Ah', 0 FROM products WHERE slug = 'bateria-12v-100ah-trojan' ON CONFLICT DO NOTHING;
+SELECT id, 'https://bateriasonline.com/6759-large_default/bateria-trojan-31-agm-trojan-battery-baterias-plomo-12v.webp', 'Batería Trojan 12V 100Ah', 0 FROM products WHERE slug = 'bateria-12v-100ah-trojan' ON CONFLICT DO NOTHING;
 INSERT INTO public.product_images (product_id, url, alt_text, position)
-SELECT id, 'https://images.unsplash.com/photo-1588508065123-8d18a256a20f?w=500&h=500&fit=crop', 'Batería Heavy Duty 24V 190Ah', 0 FROM products WHERE slug = 'bateria-24v-190ah-heavy' ON CONFLICT DO NOTHING;
+SELECT id, 'https://zaps.gr/wp-content/uploads/2023/10/MRP56069.jpg', 'Batería Heavy Duty 24V 190Ah', 0 FROM products WHERE slug = 'bateria-24v-190ah-heavy' ON CONFLICT DO NOTHING;
 
 -- Frenos
 INSERT INTO public.product_images (product_id, url, alt_text, position)
@@ -507,11 +507,11 @@ INSERT INTO public.product_images (product_id, url, alt_text, position)
 SELECT id, 'https://images.unsplash.com/photo-1554169889-cccb6dd015ea?w=500&h=500&fit=crop', 'Neumático 225/65R17 SUV', 0 FROM products WHERE slug = 'neumatico-225-65r17-suv' ON CONFLICT DO NOTHING;
 
 -- Actualizar primary_image_url de productos
-UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500&h=500&fit=crop' WHERE slug = 'bateria-12v-65ah-bosch';
-UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1630630889253-05266bff8636?w=500&h=500&fit=crop' WHERE slug = 'bateria-12v-70ah-exell';
-UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1593642632512-d5e70acf4f71?w=500&h=500&fit=crop' WHERE slug = 'bateria-12v-55ah-ac';
-UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop' WHERE slug = 'bateria-12v-100ah-trojan';
-UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1588508065123-8d18a256a20f?w=500&h=500&fit=crop' WHERE slug = 'bateria-24v-190ah-heavy';
+UPDATE public.products SET primary_image_url = 'https://http2.mlstatic.com/D_NQ_NP_713101-MCO95984260660_102025-O.webp' WHERE slug = 'bateria-12v-65ah-bosch';
+UPDATE public.products SET primary_image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6EsnyrQ55xfAJe4YcFX-N2aU3nPVuXBTSJQ&s' WHERE slug = 'bateria-12v-70ah-exell';
+UPDATE public.products SET primary_image_url = 'https://m.media-amazon.com/images/I/51wTlVFzDKL.jpg' WHERE slug = 'bateria-12v-55ah-ac';
+UPDATE public.products SET primary_image_url = 'https://d3f7dpm96o8eu9.cloudfront.net/media/catalog/product/cache/9e6e15f15c64005f80b557b19e6068ef/t/r/trojan-scs150.jpg' WHERE slug = 'bateria-12v-100ah-trojan';
+UPDATE public.products SET primary_image_url = 'https://zaps.gr/wp-content/uploads/2023/10/MRPNS40ENL_1.jpg' WHERE slug = 'bateria-24v-190ah-heavy';
 UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1612817288484-e55a39e48b91?w=500&h=500&fit=crop' WHERE slug = 'pastilla-freno-delant-estd';
 UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1621905167918-48416bd8575a?w=500&h=500&fit=crop' WHERE slug = 'pastilla-freno-delant-sport';
 UPDATE public.products SET primary_image_url = 'https://images.unsplash.com/photo-1613365064933-dd34f1e1ad4a?w=500&h=500&fit=crop' WHERE slug = 'pastilla-freno-trasera-std';

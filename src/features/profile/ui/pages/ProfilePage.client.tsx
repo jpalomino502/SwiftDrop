@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Checkbox, Input, Modal, ModalBody, ModalContent, ModalHeader, Avatar } from "@heroui/react";
-
+import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 
 import { AuthModal } from "@/src/features/auth";
@@ -628,7 +628,8 @@ export function ProfilePage() {
                     )}
 
                     {orders.map((order) => (
-                      <div
+                      <Link
+                        href={`/profile/orders/${order.id}`}
                         key={order.id}
                         className=" border border-gray-100 p-5 md:p-7 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-black transition-colors cursor-pointer group"
                       >
@@ -671,7 +672,7 @@ export function ProfilePage() {
                             className="text-gray-300 group-hover:text-black transition-colors"
                           />
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>

@@ -32,6 +32,8 @@ type Order = {
     shipping_cents: number;
     total_cents: number;
     currency: string;
+    delivery_pin: number;
+    delivery_pin_verified: boolean;
 };
 
 type OrderItem = {
@@ -107,7 +109,9 @@ export default function OrderDetailsPage({ params }: Props) {
                     subtotal_cents,
                     shipping_cents,
                     total_cents,
-                    currency
+                    currency,
+                    delivery_pin,
+                    delivery_pin_verified
                 `)
                 .eq("id", resolvedParams.id)
                 .maybeSingle();
@@ -536,6 +540,38 @@ export default function OrderDetailsPage({ params }: Props) {
                                                 </p>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* DELIVERY PIN */}
+                        <div className="border border-gray-200 rounded-3xl p-6 bg-white mt-8">
+                            <p className="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-3">
+                                Verificación de entrega
+                            </p>
+
+                            <h2 className="text-2xl font-light mb-3">
+                                PIN de entrega
+                            </h2>
+
+                            <p className="text-sm text-gray-500 mb-6 max-w-xl">
+                                Muestra este PIN al repartidor cuando llegue tu pedido.
+                                Esto confirma que el pedido fue entregado correctamente.
+                            </p>
+
+                            {order.delivery_pin_verified ? (
+                                <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green-50 text-green-700 border border-green-200">
+                                    Pedido verificado y entregado
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-4 flex-wrap">
+                                    <div className="text-4xl tracking-[0.4em] font-light px-8 py-5 rounded-2xl bg-black text-white">
+                                        {order.delivery_pin}
+                                    </div>
+
+                                    <div className="text-sm text-gray-500">
+                                        Entrégalo únicamente al repartidor.
                                     </div>
                                 </div>
                             )}

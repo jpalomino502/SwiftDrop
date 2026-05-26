@@ -94,6 +94,18 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
         }
 
         const orderId = typeof rpcData === "string" ? rpcData : null;
+        const deliveryPin = Math.floor(100000 + Math.random() * 900000).toString();
+
+        const { error: pinError } = await supabase
+            .from("orders")
+            .update({
+                delivery_pin: deliveryPin,
+            })
+            .eq("id", orderId);
+
+        if (pinError) {
+            throw new Error(pinError.message || "No se pudo generar el PIN del pedido.");
+        }
         if (!orderId) {
             throw new Error("La respuesta del servidor no incluye un ID de orden valido.");
         }

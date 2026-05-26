@@ -7,8 +7,16 @@ database/
 ├── schema.sql                          # Schema PostgreSQL completo
 ├── storage_product_images.sql          # Configuración de storage S3
 ├── migrations/
-│   ├── 20260321_checkout_hardening.sql    # Checkpoint de seguridad
-│   └── 20260430_initial_product_data.sql  # 👈 NUEVA - Datos iniciales MVP
+│   ├── 20260321_checkout_hardening.sql       # Checkpoint de seguridad
+│   ├── 20260430_initial_product_data.sql      # Datos iniciales MVP
+│   ├── 20260526_add_delivery_pin_columns.sql  # PIN de entrega
+│   ├── 20260526_add_customer_type.sql         # Minorista/Mayorista
+│   ├── 20260526_add_loyalty_tables.sql        # Programa de fidelización
+│   ├── 20260526_add_sms_notifications.sql     # Notificaciones SMS
+│   ├── 20260526_add_epayco_provider.sql       # Soporte ePayco
+│   ├── 20260526_add_drones_tables.sql         # Drones y mantenimiento
+│   ├── 20260526_add_logistics_tables.sql      # Logística multimodal + GPS
+│   └── 20260526_seed_demo_data.sql            # Seed demo (drones, vehículos)
 └── README.md (este archivo)
 ```
 
@@ -283,24 +291,22 @@ export default supabase
 
 ---
 
-## 📈 Próximas Migraciones
+## 📈 Migraciones implementadas (2026-05-26)
 
-### v2 (Planeada)
-- `20260515_add_drone_tracking.sql`
-  - Tabla: `delivery_assignments`
-  - Tabla: `drone_gps_coordinates`
-  - Indexes para queries de tiempo real
+Las siguientes funcionalidades ya están en migraciones:
+- ✅ Diferenciación minorista/mayorista (`customer_type`)
+- ✅ Programa de fidelización (`loyalty_rules`, `loyalty_transactions`)
+- ✅ SMS mock (`sms_notifications`)
+- ✅ ePayco provider (`payment_provider` enum)
+- ✅ Drones, mantenimiento y alertas (`drones`, `drone_maintenance`, `drone_alerts`)
+- ✅ Logística multimodal (`delivery_vehicles`, `delivery_assignments`, `gps_coordinates`)
+- ✅ Seed demo con 3 drones, 2 motos, 2 bicicletas
 
-### v3 (Planeada)
-- `20260601_add_loyalty_program.sql`
-  - Tabla: `customer_loyalty_points`
-  - Tabla: `redemption_history`
-
-### v4 (Planeada)
-- `20260615_add_dian_compliance.sql`
-  - Tabla: `invoices`
-  - Tabla: `invoice_details`
-  - Stored procedures para conformidad
+## 📋 Próximas mejoras
+- Facturación DIAN con UBL 2.1 (tablas `invoices`, `invoice_details`)
+- Migración a SDK real de ePayco cuando haya credenciales
+- Integración real con Twilio cuando haya cuenta
+- Persistencia del carrito en BD (`carts`, `cart_items`)
 
 ---
 

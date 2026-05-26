@@ -1,14 +1,15 @@
 "use client";
 
 import { StatusBadge } from "../components/StatusBadge";
-import { Search, Filter, MoreHorizontal, Eye } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Eye, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Button } from "@heroui/react";
 
 import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
 import { getAdminBootstrapSql, useAdminAccess } from "../client/useAdminAccess";
 import { formatCOP } from "@/src/shared/presentation/ui";
+import { updateOrderStatus } from "../../server/actions";
 
 type OrderRow = {
     id: string;
@@ -36,6 +37,9 @@ export function OrdersPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>("");
     const [query, setQuery] = useState("");
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
 
     async function load() {
         setError("");
@@ -63,6 +67,17 @@ export function OrdersPage() {
         void load();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [access.status]);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setOpenMenuId(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -212,7 +227,7 @@ export function OrdersPage() {
                                                 {formatCOP(order.total_cents)}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center justify-center gap-2">
+                                                <div className="flex items-center justify-center gap-2 relative">
                                                     <Link
                                                         href={`/admin/orders/${order.id}`}
                                                         className="p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100"
@@ -220,9 +235,52 @@ export function OrdersPage() {
                                                     >
                                                         <Eye size={18} />
                                                     </Link>
-                                                    <button className="p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100" type="button">
-                                                        <MoreHorizontal size={18} />
-                                                    </button>
+                                                    <div ref={openMenuId === order.id ? menuRef : undefined} className="relative">
+                                                        <button
+                                                            className="p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100"
+                                                            type="button"
+                                                            onClick={() => setOpenMenuId(openMenuId === order.id ? null : order.id)}
+                                                        >
+                                                            <MoreHorizontal size={18} />
+                                                        </button>
+                                                        {openMenuId === order.id && (
+                                                            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 shadow-lg rounded-lg z-50 py-1">
+                                                                <p className="px-3 py-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Cambiar estado</p>
+                                                                {[
+                                                                    { value: "pending", label: "Pendiente" },
+                                                                    { value: "processing", label: "Procesando" },
+                                                                    { value: "fulfilled", label: "Preparado" },
+                                                                    { value: "shipped", label: "Enviado" },
+                                                                    { value: "delivered", label: "Entregado" },
+                                                                    { value: "cancelled", label: "Cancelado" },
+                                                                ].map((status) => (
+                                                                    <button
+                                                                        key={status.value}
+                                                                        type="button"
+                                                                        disabled={updatingId === order.id || order.status === status.value}
+                                                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${order.status === status.value ? "text-gray-400 cursor-default" : "text-gray-700"}`}
+                                                                        onClick={async () => {
+                                                                            if (order.status === status.value) return;
+                                                                            setUpdatingId(order.id);
+                                                                            const res = await updateOrderStatus(order.id, status.value);
+                                                                            if (res.success) {
+                                                                                setOpenMenuId(null);
+                                                                                await load();
+                                                                            } else {
+                                                                                alert(res.error || "No se pudo actualizar el estado");
+                                                                            }
+                                                                            setUpdatingId(null);
+                                                                        }}
+                                                                    >
+                                                                        {updatingId === order.id ? "Actualizando..." : status.label}
+                                                                        {order.status === status.value && (
+                                                                            <span className="ml-2 text-xs text-gray-400">(actual)</span>
+                                                                        )}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>

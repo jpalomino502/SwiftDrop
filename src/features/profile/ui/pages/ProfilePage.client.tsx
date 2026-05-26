@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
   Settings,
+  Star,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Checkbox, Input, Modal, ModalBody, ModalContent, ModalHeader, Avatar } from "@heroui/react";
@@ -22,7 +23,7 @@ import {
   getSupabaseMissingEnvMessage,
 } from "@/src/lib/supabase/browser";
 
-type TabId = "pedidos" | "direcciones" | "detalles";
+type TabId = "pedidos" | "direcciones" | "detalles" | "puntos";
 
 type CustomerRow = {
   id: string;
@@ -62,7 +63,12 @@ type OrderRow = {
   | "refunded";
   total_cents: number;
   currency: string;
+  order_items?: { image_url: string | null }[];
 };
+
+function getOrderPreviewImage(order: OrderRow) {
+  return order.order_items?.[0]?.image_url ?? "/placeholder.svg";
+}
 
 function formatMoney(amountCents: number, currency: string) {
   const amount = amountCents / 100;
@@ -136,6 +142,12 @@ export function ProfilePage() {
     phone: "",
   });
   const [profileSaving, setProfileSaving] = useState(false);
+
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [customerType, setCustomerType] = useState<"retail" | "wholesale">("retail");
+  const [loyaltyTransactions, setLoyaltyTransactions] = useState<Array<{
+    id: string; type: string; points: number; description: string | null; created_at: string;
+  }>>([]);
 
   const userData = useMemo(
     () => {
@@ -252,7 +264,7 @@ export function ProfilePage() {
         setOrdersLoading(true);
         const { data: ordersData, error: ordersErr } = await supabase
           .from("orders")
-          .select("id,order_number,created_at,status,total_cents,currency")
+          .select("id,order_number,created_at,status,total_cents,currency,order_items(image_url)")
           .eq("customer_id", customerRow.id)
           .order("created_at", { ascending: false })
           .limit(50);
@@ -273,6 +285,23 @@ export function ProfilePage() {
         if (addrErr) throw addrErr;
         setAddresses((addrData ?? []) as AddressRow[]);
         setAddressesLoading(false);
+
+        // 4) Loyalty
+        const { data: custLoyalty } = await supabase
+          .from("customers")
+          .select("loyalty_points, customer_type")
+          .eq("id", customerRow.id)
+          .maybeSingle();
+        setLoyaltyPoints(custLoyalty?.loyalty_points ?? 0);
+        setCustomerType((custLoyalty?.customer_type as "retail" | "wholesale") ?? "retail");
+
+        const { data: txData } = await supabase
+          .from("loyalty_transactions")
+          .select("id, type, points, description, created_at")
+          .eq("customer_id", customerRow.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        setLoyaltyTransactions(txData ?? []);
 
       } catch (err) {
         const message = err instanceof Error ? err.message : "Error cargando tu cuenta";
@@ -441,6 +470,7 @@ export function ProfilePage() {
       [
         { id: "pedidos" as const, label: "Mis Pedidos", icon: Package },
         { id: "direcciones" as const, label: "Direcciones", icon: MapPin },
+        { id: "puntos" as const, label: "Puntos y Fidelidad", icon: Star },
         { id: "detalles" as const, label: "Datos Personales", icon: Settings },
       ] satisfies Array<{ id: TabId; label: string; icon: typeof Package }>,
     [],
@@ -636,7 +666,7 @@ export function ProfilePage() {
                         <div className="flex items-center gap-5 min-w-0">
                           <div className="relative w-16 h-20 bg-[#f7f7f7]  overflow-hidden shrink-0">
                             <img
-                              src="/placeholder.svg"
+                              src={getOrderPreviewImage(order)}
                               alt="Producto del pedido"
                               width={64}
                               height={80}
@@ -760,6 +790,51 @@ export function ProfilePage() {
               )}
 
 
+
+              {activeTab === "puntos" && (
+                <div>
+                  <p className="text-[10px] uppercase text-gray-400 mb-3">Fidelización</p>
+                  <h1 className="text-2xl md:text-3xl font-normal mb-8 md:mb-10">Mis Puntos</h1>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                    <div className="border border-gray-100 bg-white p-6">
+                      <p className="text-xs text-gray-400 uppercase">Puntos actuales</p>
+                      <p className="text-3xl font-normal mt-2">{loyaltyPoints}</p>
+                    </div>
+                    <div className="border border-gray-100 bg-white p-6">
+                      <p className="text-xs text-gray-400 uppercase">Tipo de cliente</p>
+                      <p className="text-3xl font-normal mt-2 capitalize">
+                        {customerType === "wholesale" ? "Mayorista" : "Minorista"}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {customerType === "wholesale"
+                          ? "Acumulas 2x puntos por compra"
+                          : "Acumulas 1x punto por compra"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-normal mb-4">Historial de transacciones</h2>
+                    {loyaltyTransactions.length === 0 && (
+                      <p className="text-sm text-gray-500">Aún no tienes transacciones de puntos.</p>
+                    )}
+                    <div className="space-y-3">
+                      {loyaltyTransactions.map((tx) => (
+                        <div key={tx.id} className="flex items-center justify-between border border-gray-100 p-4">
+                          <div>
+                            <p className="text-sm">{tx.description || "Transacción"}</p>
+                            <p className="text-xs text-gray-400">{new Date(tx.created_at).toLocaleDateString("es-CO")}</p>
+                          </div>
+                          <span className={`text-sm font-medium ${tx.points > 0 ? "text-green-600" : "text-red-600"}`}>
+                            {tx.points > 0 ? "+" : ""}{tx.points} pts
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {activeTab === "detalles" && (
                 <div className="max-w-2xl">

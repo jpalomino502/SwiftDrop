@@ -2,6 +2,9 @@
 
 import { getSupabaseServerClientWithCookies } from "@/src/lib/supabase/ssr";
 import { sendOrderConfirmationEmail } from "@/src/lib/email/resend";
+import { sendDeliveryPinSms } from "@/src/lib/sms/mockSms";
+import { accrueLoyaltyPoints } from "@/src/features/loyalty/server/actions";
+import { assignDelivery } from "@/src/features/logistics/server/actions";
 import { calculateShippingQuote } from "../lib/shipping";
 
 interface OrderItem {
@@ -30,6 +33,10 @@ interface CreateOrderParams {
     items: OrderItem[];
     email: string;
     address: AddressData;
+    paymentProvider?: "manual" | "epayco";
+    appliedDiscountCents?: number;
+    redeemedPoints?: number;
+    promoCode?: string;
 }
 
 type RpcCheckoutItem = {
@@ -50,7 +57,7 @@ function sanitizeCheckoutItems(items: OrderItem[]): RpcCheckoutItem[] {
         .filter((item) => Number.isFinite(item.productId) && item.productId > 0 && Number.isFinite(item.quantity) && item.quantity > 0);
 }
 
-export async function createOrder({ items, email, address }: CreateOrderParams) {
+export async function createOrder({ items, email, address, paymentProvider = "manual", appliedDiscountCents = 0, redeemedPoints = 0, promoCode }: CreateOrderParams) {
     const supabase = await getSupabaseServerClientWithCookies();
     if (!supabase) {
         throw new Error("No se pudo conectar con la base de datos (Error de configuración).");
@@ -96,6 +103,10 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
         const orderId = typeof rpcData === "string" ? rpcData : null;
         const deliveryPin = Math.floor(100000 + Math.random() * 900000).toString();
 
+        if (!orderId) {
+            throw new Error("La respuesta del servidor no incluye un ID de orden valido.");
+        }
+
         const { error: pinError } = await supabase
             .from("orders")
             .update({
@@ -106,14 +117,11 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
         if (pinError) {
             throw new Error(pinError.message || "No se pudo generar el PIN del pedido.");
         }
-        if (!orderId) {
-            throw new Error("La respuesta del servidor no incluye un ID de orden valido.");
-        }
 
         // Recalculate shipping with current business rules and persist on order/payment.
         const { data: orderForTotals, error: orderReadError } = await supabase
             .from("orders")
-            .select("subtotal_cents")
+            .select("subtotal_cents, customer_id")
             .eq("id", orderId)
             .maybeSingle();
 
@@ -127,14 +135,24 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
             subtotalCents,
             items: safeItems.map((item) => ({ quantity: item.quantity })),
         });
-        const totalCents = subtotalCents + shippingQuote.shippingCents;
+        const discountCents = Math.max(0, Math.floor(appliedDiscountCents));
+        const totalCents = Math.max(0, subtotalCents + shippingQuote.shippingCents - discountCents);
 
         const { error: orderUpdateError } = await supabase
             .from("orders")
             .update({
                 shipping_cents: shippingQuote.shippingCents,
                 tax_cents: 0,
+                discount_cents: discountCents,
                 total_cents: totalCents,
+                metadata: {
+                    payment_provider: paymentProvider,
+                    redeemed_points: redeemedPoints,
+                    promo_code: promoCode || null,
+                    customer_name: address.name,
+                    customer_phone: address.phone,
+                    notes: paymentProvider === "epayco" ? "Pago con ePayco (sandbox)" : "Pedido Contra Entrega",
+                },
             })
             .eq("id", orderId);
 
@@ -142,6 +160,7 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
             throw new Error(orderUpdateError.message || "No se pudo actualizar el total del pedido.");
         }
 
+        // Update payment intent
         const { error: paymentUpdateError } = await supabase
             .from("payment_intents")
             .update({ amount_cents: totalCents })
@@ -152,7 +171,41 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
             throw new Error(paymentUpdateError.message || "No se pudo actualizar el monto de pago.");
         }
 
-        // Best effort email (non-blocking): checkout should succeed even if email provider fails.
+        // SMS mock delivery PIN
+        try {
+            await sendDeliveryPinSms(address.phone, orderId, deliveryPin);
+        } catch {
+            // SMS is best-effort/mock for prototype
+        }
+
+        // Loyalty points accrual
+        try {
+            const customerId = orderForTotals?.customer_id;
+            if (customerId && totalCents > 0) {
+                await accrueLoyaltyPoints(orderId, customerId, totalCents);
+            }
+        } catch {
+            // Best-effort loyalty
+        }
+
+        // Logistics assignment (simulated)
+        try {
+            await assignDelivery({
+                orderId,
+                estimatedWeightKg: safeItems.reduce((sum, i) => sum + i.quantity * 0.8, 0),
+                estimatedDistanceKm: 5 + Math.random() * 10,
+                originLat: 7.12539,
+                originLng: -73.1198,
+                destLat: 7.12 + (Math.random() - 0.5) * 0.02,
+                destLng: -73.12 + (Math.random() - 0.5) * 0.02,
+            });
+        } catch {
+            // Best-effort assignment
+        }
+
+        // Best effort email (non-blocking): only for manual/contra-entrega.
+        // For ePayco, the confirmation email is sent after payment is approved in the callback.
+        if (paymentProvider !== "epayco") {
         try {
             const [{ data: orderRow }, { data: orderItems }] = await Promise.all([
                 supabase
@@ -166,7 +219,7 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
                     .eq("order_id", orderId),
             ]);
 
-            const safeItems = (orderItems ?? []).map((item) => ({
+            const safeOrderItems = (orderItems ?? []).map((item) => ({
                 title: item.title ?? "Producto",
                 quantity: typeof item.quantity === "number" ? item.quantity : 1,
                 lineTotalCents: typeof item.line_total_cents === "number" ? item.line_total_cents : 0,
@@ -179,7 +232,7 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
                 orderNumber: orderRow?.order_number ?? null,
                 currency: orderRow?.currency ?? "COP",
                 totalCents: orderRow?.total_cents ?? 0,
-                items: safeItems,
+                items: safeOrderItems,
             });
 
             if (!mailResult.ok) {
@@ -246,8 +299,9 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
         } catch {
             // ignore email failures in checkout flow
         }
+        }
 
-        return { success: true, orderId };
+        return { success: true, orderId, paymentProvider };
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "No se pudo procesar el pedido.";

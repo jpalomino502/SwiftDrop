@@ -17,6 +17,95 @@ import autoTable from "jspdf-autotable";
 
 import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
 
+type TrackingAssignment = {
+    assigned_vehicle_type?: string;
+    estimated_weight_kg?: number;
+    estimated_distance_km?: number;
+    drones?: { name?: string } | null;
+    delivery_vehicles?: { name?: string } | null;
+};
+
+function OrderTrackingSection({ orderId }: { orderId: string }) {
+    const [assignment, setAssignment] = useState<TrackingAssignment | null>(null);
+    const [coords, setCoords] = useState<unknown[]>([]);
+    const [progress, setProgress] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function load() {
+            try {
+                const res = await fetch(`/api/tracking/${orderId}`);
+                const data = await res.json();
+                setAssignment(data.assignment as TrackingAssignment | null);
+                setCoords(data.coordinates ?? []);
+                setProgress(data.progress ?? 0);
+            } catch {
+                // ignore
+            } finally {
+                setLoading(false);
+            }
+        }
+        load();
+    }, [orderId]);
+
+    if (loading) {
+        return (
+            <div className="border border-gray-100 bg-white p-8">
+                <p className="text-sm text-gray-500">Cargando seguimiento…</p>
+            </div>
+        );
+    }
+
+    const VEHICLE_EMOJI: Record<string, string> = {
+        drone: "🚁 Drone",
+        motorcycle: "🏍️ Moto",
+        bicycle: "🚲 Bicicleta",
+    };
+
+    return (
+        <div className="border border-gray-100 bg-white overflow-hidden">
+            <div className="p-8 border-b border-gray-100">
+                <div className="flex items-center gap-3 mb-3">
+                    <Truck size={20} strokeWidth={1.5} />
+                    <h2 className="text-xl font-normal">Seguimiento</h2>
+                </div>
+                <p className="text-sm text-gray-500">Estado actual de tu envío.</p>
+            </div>
+
+            {assignment ? (
+                <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <span className="text-2xl">{VEHICLE_EMOJI[assignment.assigned_vehicle_type ?? ""] ?? "🚚"}</span>
+                        <div>
+                            <p className="text-sm font-medium">
+                                {assignment.drones?.name ?? assignment.delivery_vehicles?.name ?? "Vehículo asignado"}
+                            </p>
+                            <p className="text-xs text-gray-400 capitalize">{assignment.assigned_vehicle_type}</p>
+                        </div>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-4">
+                        Peso: {assignment.estimated_weight_kg ?? 0} kg — Distancia: {(assignment.estimated_distance_km ?? 0).toFixed(1)} km
+                    </div>
+                    {coords.length > 0 && (
+                        <div className="mb-4">
+                            <p className="text-xs text-gray-400 mb-2">Progreso: {Math.round(progress)}%</p>
+                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-black transition-all" style={{ width: `${progress}%` }} />
+                            </div>
+                        </div>
+                    )}
+                    <p className="text-xs text-gray-400">Mapa interactivo disponible en /track-order</p>
+                </div>
+            ) : (
+                <div className="p-8 text-center">
+                    <Package size={32} className="mx-auto text-gray-300 mb-3" />
+                    <p className="text-sm text-gray-500">Tu pedido aún no tiene asignación de entrega.</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
 type Props = {
     params: Promise<{
         id: string;
@@ -34,6 +123,7 @@ type Order = {
     currency: string;
     delivery_pin: number;
     delivery_pin_verified: boolean;
+    metadata?: Record<string, unknown> | null;
 };
 
 type OrderItem = {
@@ -219,10 +309,17 @@ export default function OrderDetailsPage({ params }: Props) {
         const orderDate = new Date(order.created_at).toLocaleDateString("es-ES");
 
         doc.text(`Pedido: #${String(order.order_number).padStart(4, "0")}`, 48, 170);
-
         doc.text(`Fecha: ${orderDate}`, 48, 190);
-
         doc.text(`Estado: ${humanStatus}`, 48, 210);
+        doc.text(`Método de pago: ${order.metadata?.payment_provider === "epayco" ? "ePayco (simulado)" : "Contra entrega"}`, 48, 230);
+        doc.text(`NIT simulado: 900.123.456-7`, 48, 250);
+        doc.text(`Resolución DIAN simulada: 18760000001-2024`, 48, 270);
+
+        doc.setTextColor(...gray);
+        doc.setFontSize(9);
+        doc.text("Este documento es una factura electrónica simulada sin validez fiscal para prototipo académico.", 48, 295);
+        doc.setTextColor(...black);
+        doc.setFontSize(11);
 
         if (address) {
             doc.setFont("helvetica", "bold");
@@ -273,6 +370,7 @@ export default function OrderDetailsPage({ params }: Props) {
             tableLineWidth: 0.5,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const finalY = (doc as any).lastAutoTable.finalY + 30;
 
         doc.setFillColor(250, 250, 250);
@@ -443,107 +541,7 @@ export default function OrderDetailsPage({ params }: Props) {
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* TRACKING */}
-                        <div className="border border-gray-100 bg-white overflow-hidden">
-
-                            <div className="p-8 border-b border-gray-100">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Truck size={20} strokeWidth={1.5} />
-                                    <h2 className="text-xl font-normal">
-                                        Seguimiento
-                                    </h2>
-                                </div>
-
-                                <p className="text-sm text-gray-500">
-                                    Estado actual de tu envío.
-                                </p>
-                            </div>
-
-                            {!isShipped ? (
-                                <div className="relative h-90 bg-[#f8f8f8] overflow-hidden">
-
-                                    {/* Fake road */}
-                                    <div className="absolute bottom-20 left-0 right-0 h-20 bg-[#2b2b2b]" />
-
-                                    <div className="absolute bottom-14.5 left-0 right-0 border-t-4 border-dashed border-yellow-300 opacity-70" />
-
-                                    {/* Fake city */}
-                                    <div className="absolute inset-0 opacity-10">
-                                        <div className="absolute left-10 top-10 w-24 h-40 bg-black" />
-                                        <div className="absolute left-40 top-20 w-20 h-32 bg-black" />
-                                        <div className="absolute right-20 top-16 w-32 h-52 bg-black" />
-                                        <div className="absolute right-60 top-24 w-20 h-36 bg-black" />
-                                    </div>
-
-                                    {/* Animated truck */}
-                                    <div className="absolute bottom-18 animate-[truckMove_6s_linear_infinite]">
-                                        <div className="relative">
-
-                                            <div className="w-28 h-10 bg-black rounded-sm" />
-
-                                            <div className="absolute -right-8 top-2 w-10 h-8 bg-gray-700 rounded-sm" />
-
-                                            <div className="absolute left-4 -bottom-2.5 w-5 h-5 rounded-full bg-black border-4 border-gray-500" />
-
-                                            <div className="absolute left-20 -bottom-2.5 w-5 h-5 rounded-full bg-black border-4 border-gray-500" />
-
-                                            <div className="absolute -right-5.5 -bottom-2.5 w-5 h-5 rounded-full bg-black border-4 border-gray-500" />
-
-                                        </div>
-                                    </div>
-
-                                    <div className="absolute inset-x-0 bottom-8 text-center">
-                                        <p className="text-sm text-gray-500">
-                                            Tu pedido está siendo preparado para envío
-                                        </p>
-                                    </div>
-
-                                    <style jsx>{`
-                                        @keyframes truckMove {
-                                            0% {
-                                                transform: translateX(-160px);
-                                            }
-                                            100% {
-                                                transform: translateX(calc(100vw - 200px));
-                                            }
-                                        }
-                                    `}</style>
-                                </div>
-                            ) : (
-                                <div className="relative h-105 overflow-hidden">
-
-                                    <iframe
-                                        title="Tracking map"
-                                        className="absolute inset-0 w-full h-full"
-                                        loading="lazy"
-                                        src="https://maps.google.com/maps?q=Bogota&t=&z=11&ie=UTF8&iwloc=&output=embed"
-                                    />
-
-                                    <div className="absolute top-6 left-6 bg-white/95 backdrop-blur border border-gray-100 p-5 max-w-sm">
-                                        <div className="flex items-start gap-3">
-                                            <MapPin
-                                                size={18}
-                                                strokeWidth={1.5}
-                                                className="mt-0.5"
-                                            />
-
-                                            <div>
-                                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">
-                                                    Última ubicación
-                                                </p>
-
-                                                <h3 className="text-lg font-normal mb-1">
-                                                    Centro logístico
-                                                </h3>
-
-                                                <p className="text-sm text-gray-500">
-                                                    Bogotá, Colombia
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <OrderTrackingSection orderId={resolvedParams.id} />
 
                         {/* DELIVERY PIN */}
                         <div className="border border-gray-200 rounded-3xl p-6 bg-white mt-8">

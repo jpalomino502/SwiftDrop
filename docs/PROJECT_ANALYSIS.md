@@ -756,28 +756,43 @@ xl: 1280px    (desktop)
 
 ---
 
-## ✅ ESTADO ACTUAL (MVP)
+## ✅ ESTADO ACTUAL (MVP + Sprint 4 Prototipo)
 
 ### ✅ Implementado
-- [x] Esquema PostgreSQL completo
-- [x] Autenticación Supabase
-- [x] Catálogo de 24 productos + 41 SKUs
-- [x] Carrito y checkout básicos
-- [x] Integración ePayco (Sandbox)
-- [x] Google Maps simulado
-- [x] SMS notifications (Twilio)
-- [x] Panel admin funcional
-- [x] RLS para seguridad
+- [x] Esquema PostgreSQL completo con RLS
+- [x] Autenticación Supabase (login/registro)
+- [x] Roles admin (owner/admin/staff)
+- [x] Catálogo de 24 productos + 41 SKUs desde BD
+- [x] Carrito (localStorage)
+- [x] Checkout transaccional con RPC
+- [x] Diferenciación minorista/mayorista (`customer_type`)
+- [x] Programa de fidelización: acumulación y visualización de puntos
+- [x] ePayco Sandbox simulado (modo mock sin SDK real)
+- [x] Factura PDF simulada (jsPDF, sin validez fiscal)
+- [x] PIN de entrega generado y almacenado
+- [x] SMS mock (guarda en BD, sin Twilio real por defecto)
+- [x] Drones simulados: tabla, estado, batería, mantenimiento, alertas
+- [x] Logística multimodal: asignación automática drone/moto/bicicleta
+- [x] GPS simulado: coordenadas generadas algorítmicamente
+- [x] Mapa interactivo con Leaflet (OpenStreetMap)
+- [x] Seguimiento de pedido con progreso
+- [x] Panel admin: dashboard, órdenes, productos, categorías, inventario, clientes, promociones, drones, logística
+- [x] Email de confirmación (Resend)
+- [x] Promociones (tabla, validación básica en checkout)
 
-### 🚧 En Desarrollo
-- [ ] Facturación DIAN (PDF proforma primera fase)
-- [ ] Rastreo GPS completo (geolocalización simulada)
-- [ ] Programa de fidelización
-- [ ] Dashboard de métricas avanzadas
+### 🚧 Simulado / Prototipo
+- Drones: sin hardware real
+- GPS: coordenadas generadas, no GPS real
+- SMS: servicio mock, sin Twilio real
+- ePayco: sin SDK real, simulación interna
+- Factura: PDF simple sin validez fiscal ni DIAN real
 
 ### 📋 Backlog Post-MVP
 - [ ] App móvil nativa
 - [ ] Integración hardware IoT real
+- [ ] SDK real de ePayco con credenciales
+- [ ] Twilio real con credenciales
+- [ ] Facturación DIAN UBL 2.1
 - [ ] Machine Learning para recomendaciones
 - [ ] Marketplace con múltiples vendedores
 - [ ] Webhooks para integraciones B2B

@@ -23,13 +23,24 @@ type VariantRow = {
     sku: string | null;
     title: string | null;
     option_values: unknown;
-    product: { id: string; name: string }[];
-    inventory: InventoryItemRow[];
+    product_id: { id: string; name: string } | { id: string; name: string }[] | null;
+    inventory: InventoryItemRow | InventoryItemRow[] | null;
 };
 
 function parseOptionValues(obj: unknown): Record<string, unknown> {
     if (!obj || typeof obj !== "object") return {};
     return obj as Record<string, unknown>;
+}
+
+function normalizeArray<T>(val: T | T[] | null | undefined): T[] {
+    if (val == null) return [];
+    if (Array.isArray(val)) return val;
+    return [val];
+}
+
+function getSingleRelation<T>(relation: T | T[] | null | undefined): T | null {
+    if (!relation) return null;
+    return Array.isArray(relation) ? relation[0] ?? null : relation;
 }
 
 export function InventoryPage() {
@@ -66,7 +77,7 @@ export function InventoryPage() {
         try {
             const { data, error } = await supabase
                 .from("product_variants")
-                .select("id,sku,title,option_values,product:products(id,name),inventory:inventory_items(variant_id,stock_on_hand,reserved,low_stock_threshold)")
+                .select("id,sku,title,option_values,product_id:products(id,name),inventory:inventory_items(variant_id,stock_on_hand,reserved,low_stock_threshold)")
                 .order("created_at", { ascending: false })
                 .limit(500);
             if (error) throw error;
@@ -89,7 +100,8 @@ export function InventoryPage() {
         return rows.filter((v) => {
             const ov = parseOptionValues(v.option_values);
             const variantLabel = v.title || (typeof ov.title === "string" ? (ov.title as string) : "");
-            const productName = v.product?.[0]?.name ?? "";
+            const products = normalizeArray(v.product_id);
+            const productName = products[0]?.name ?? "";
             return (
                 productName.toLowerCase().includes(q) ||
                 (v.sku ?? "").toLowerCase().includes(q) ||
@@ -100,7 +112,7 @@ export function InventoryPage() {
 
     const lowStockCount = useMemo(() => {
         return filtered.filter((v) => {
-            const inv = v.inventory?.[0];
+            const inv = normalizeArray(v.inventory)[0];
             const stock = inv?.stock_on_hand ?? 0;
             const thr = inv?.low_stock_threshold ?? 0;
             return stock > 0 && stock <= thr;
@@ -120,7 +132,7 @@ export function InventoryPage() {
             return;
         }
 
-        const inv = variant.inventory?.[0] ?? null;
+        const inv = normalizeArray(variant.inventory)[0] ?? null;
         const current = inv?.stock_on_hand ?? 0;
         const next = Math.max(0, current + delta);
         const lowThr = inv?.low_stock_threshold ?? 0;
@@ -256,11 +268,11 @@ export function InventoryPage() {
                             {!loading && filtered.map((variant) => {
                                 const ov = parseOptionValues(variant.option_values);
                                 const label = variant.title || (typeof ov.title === "string" ? (ov.title as string) : variant.sku || "Default");
-                                const inv = variant.inventory?.[0];
+                                const inv = getSingleRelation(variant.inventory);
                                 const stock = inv?.stock_on_hand ?? 0;
                                 const thr = inv?.low_stock_threshold ?? 0;
                                 const low = stock > 0 && stock <= thr;
-                                const productName = variant.product?.[0]?.name ?? "(Sin producto)";
+                                const productName = getSingleRelation(variant.product_id)?.name ?? "(Sin producto)";
                                 return (
                                     <tr key={variant.id} className="group transition-colors hover:bg-gray-50/50">
                                         <td className="px-6 py-4 font-medium">{productName}</td>
@@ -271,7 +283,7 @@ export function InventoryPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <StatusBadge status={stock === 0 ? "cancelled" : low ? "low_stock" : "active"} />
+                                            <StatusBadge status={stock === 0 ? "out_of_stock" : low ? "low_stock" : "active"} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">

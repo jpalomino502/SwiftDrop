@@ -12,6 +12,8 @@ import {
     Menu,
     X,
     Box,
+    Plane,
+    Route,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,7 +27,8 @@ const NAV_ITEMS = [
     { label: "Categorías", href: "/admin/categories", icon: Layers },
     { label: "Inventario", href: "/admin/inventory", icon: Box },
     { label: "Promociones", href: "/admin/promotions", icon: Tag },
-    { label: "Configuración", href: "/admin/settings", icon: Settings },
+    { label: "Drones", href: "/admin/drones", icon: Plane },
+    { label: "Logística", href: "/admin/logistics", icon: Route },
 ];
 
 export function Sidebar({ className }: { className?: string }) {

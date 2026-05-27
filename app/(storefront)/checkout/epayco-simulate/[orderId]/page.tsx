@@ -1,11 +1,6 @@
 import { notFound } from "next/navigation";
-import { createHash } from "crypto";
 import { getSupabaseServerClient } from "@/src/lib/supabase/server";
 import { EpaycoCheckoutForm } from "@/src/features/payments/ui/EpaycoCheckoutForm";
-
-function md5(text: string): string {
-  return createHash("md5").update(text).digest("hex");
-}
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -37,64 +32,55 @@ export default async function EpaycoSimulatePage({ params }: PageProps) {
   }
 
   // ePayco credentials from env
-  const pCustIdCliente = process.env.EPAYCO_CUSTOMER_ID ?? "";
-  const pKey = process.env.EPAYCO_P_KEY ?? "";
+  const publicKey = process.env.EPAYCO_PUBLIC_KEY ?? "";
+  const isTest = process.env.EPAYCO_TEST === "true";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-  if (!pCustIdCliente || !pKey) {
+  if (!publicKey) {
     return (
       <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Error de configuración</h1>
-          <p className="text-gray-600">Faltan credenciales de ePayco en el servidor.</p>
+          <p className="text-gray-600">Falta la clave pública de ePayco (EPAYCO_PUBLIC_KEY).</p>
         </div>
       </div>
     );
   }
 
-  // Convert our internal amount to COP pesos (our DB stores in a unit where *10 = COP)
-  const amountCents = typeof order.total_cents === "number" ? order.total_cents : 0;
-  const amountCOP = amountCents * 10;
-  const pAmount = amountCOP.toString();
-
-  const refPayco = `ORD-${String(order.order_number).padStart(6, "0")}-${Date.now()}`;
-  const currencyCode = order.currency || "COP";
-
-  // ePayco Standard Checkout signature
-  // Formula: MD5( p_cust_id_cliente + "^" + p_key + "^" + ref_payco + "^" + p_amount + "^" + p_currency_code )
-  const signatureString = `${pCustIdCliente}^${pKey}^${refPayco}^${pAmount}^${currencyCode}`;
-  const pSignature = md5(signatureString);
-
-  // Extract customer name from metadata if available
+  // Extract customer info from metadata
   let customerName = "";
   try {
     const meta = order.metadata as Record<string, unknown> | null;
     if (meta && typeof meta === "object") {
-      const name = (meta as Record<string, string>).customer_name ?? "";
-      if (name) customerName = name;
+      customerName = (meta.customer_name as string) || "";
     }
   } catch {
     // ignore
   }
 
-  const formData = {
-    p_cust_id_cliente: pCustIdCliente,
-    p_key: pKey,
-    p_amount: pAmount,
-    p_tax: "0",
-    p_amount_base: pAmount,
-    p_currency_code: currencyCode,
-    p_signature: pSignature,
-    p_description: `Pedido SwiftDrop #ORD-${String(order.order_number).padStart(6, "0")}`,
-    p_url_response: `${siteUrl}/api/epayco/callback`,
-    p_url_confirmation: `${siteUrl}/api/epayco/confirm`,
-    p_extra1: orderId,
-    p_extra2: refPayco,
-    p_test_request: process.env.EPAYCO_TEST === "true" ? "true" : "false",
-    p_email: order.email || "",
-    p_name: customerName,
-    ref_payco: refPayco,
+  // Amount in COP (our DB stores in a unit where *10 = COP)
+  const amountCents = typeof order.total_cents === "number" ? order.total_cents : 0;
+  const amountCOP = amountCents * 10;
+
+  const invoiceRef = `ORD-${String(order.order_number).padStart(6, "0")}`;
+
+  const checkoutData = {
+    name: `Pedido SwiftDrop ${invoiceRef}`,
+    description: `Compra en SwiftDrop — ${invoiceRef}`,
+    invoice: invoiceRef,
+    currency: (order.currency || "COP").toLowerCase(),
+    amount: amountCOP.toFixed(2),
+    tax_base: amountCOP.toFixed(2),
+    tax: "0.00",
+    country: "co",
+    lang: "es",
+    external: "false", // false = checkout ePayco iframe/modal
+    confirmation: `${siteUrl}/api/epayco/confirm`,
+    response: `${siteUrl}/api/epayco/callback`,
+    email: order.email || "",
+    extra1: orderId,
+    extra2: invoiceRef,
   };
 
-  return <EpaycoCheckoutForm formData={formData} />;
+  return <EpaycoCheckoutForm publicKey={publicKey} checkoutData={checkoutData} isTest={isTest} />;
 }

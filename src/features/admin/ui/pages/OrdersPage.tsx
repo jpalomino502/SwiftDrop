@@ -265,6 +265,9 @@ export function OrdersPage() {
                                                                             const res = await updateOrderStatus(order.id, status.value);
                                                                             if (res.success) {
                                                                                 setOpenMenuId(null);
+                                                                                if (res.smsWarning) {
+                                                                                    alert(res.smsWarning);
+                                                                                }
                                                                                 await load();
                                                                             } else {
                                                                                 alert(res.error || "No se pudo actualizar el estado");

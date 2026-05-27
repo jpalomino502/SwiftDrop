@@ -8,6 +8,7 @@ import { useAdminAccess } from "@/src/features/admin/ui/client/useAdminAccess";
 import { AssignmentCard } from "@/src/features/logistics/ui/components/AssignmentCard";
 import type { DeliveryAssignment, DeliveryVehicle } from "@/src/features/logistics/domain/DeliveryAssignment";
 import type { Drone } from "@/src/features/drones/domain/Drone";
+import { updateAssignmentStatus, verifyAndDeliverAssignment } from "@/src/features/logistics/server/actions";
 
 export default function LogisticsPage() {
   const access = useAdminAccess();
@@ -44,18 +45,24 @@ export default function LogisticsPage() {
     }
   }
 
-  async function updateStatus(assignmentId: string, status: string) {
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
-    const { error: err } = await supabase.from("delivery_assignments").update({ status }).eq("id", assignmentId);
-    if (!err) {
-      if (status === "delivered") {
-        const { data: asg } = await supabase.from("delivery_assignments").select("vehicle_id, drone_id").eq("id", assignmentId).maybeSingle();
-        if (asg?.drone_id) await supabase.from("drones").update({ status: "available" }).eq("id", asg.drone_id);
-        if (asg?.vehicle_id) await supabase.from("delivery_vehicles").update({ is_available: true }).eq("id", asg.vehicle_id);
+  async function updateStatus(assignmentId: string, status: string, pin?: string) {
+    setError("");
+    if (status === "delivered") {
+      const res = await verifyAndDeliverAssignment(assignmentId, pin ?? "");
+      if (!res.success) {
+        setError(res.error || "No se pudo verificar el PIN de entrega.");
+        return;
       }
       await load();
+      return;
     }
+
+    const res = await updateAssignmentStatus(assignmentId, status);
+    if (!res.success) {
+      setError(res.error || "No se pudo actualizar el estado de la entrega.");
+      return;
+    }
+    await load();
   }
 
   useEffect(() => {
@@ -126,7 +133,7 @@ export default function LogisticsPage() {
             <AssignmentCard
               key={a.id}
               assignment={a}
-              onUpdateStatus={(status) => void updateStatus(a.id, status)}
+              onUpdateStatus={(status, pin) => void updateStatus(a.id, status, pin)}
             />
           ))}
         </div>

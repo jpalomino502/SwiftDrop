@@ -23,7 +23,7 @@ export function AssignmentCard({
     delivery_vehicles?: { name: string; type: string } | null;
     drones?: { name: string } | null;
   };
-  onUpdateStatus?: (status: string) => void;
+  onUpdateStatus?: (status: string, pin?: string) => void;
 }) {
   const order = assignment.orders;
   const vehicle = assignment.delivery_vehicles;
@@ -83,7 +83,11 @@ export function AssignmentCard({
           {assignment.status === "in_transit" && (
             <button
               type="button"
-              onClick={() => onUpdateStatus("delivered")}
+              onClick={() => {
+                const pin = window.prompt("Ingresa el PIN de entrega para confirmar:");
+                if (!pin) return;
+                onUpdateStatus("delivered", pin);
+              }}
               className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-full hover:bg-green-700 transition-colors"
             >
               Marcar entregado

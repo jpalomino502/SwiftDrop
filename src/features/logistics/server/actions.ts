@@ -196,6 +196,18 @@ export async function updateAssignmentStatus(assignmentId: string, status: strin
   const supabase = await getSupabaseServerClientWithCookies();
   if (!supabase) return { success: false, error: "Supabase no configurado" };
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Debes iniciar sesión." };
+
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("user_id, disabled_at")
+    .eq("user_id", user.id)
+    .is("disabled_at", null)
+    .maybeSingle();
+
+  if (!adminRow) return { success: false, error: "No tienes permisos de administrador." };
+
   const { error } = await supabase
     .from("delivery_assignments")
     .update({ status })
@@ -223,4 +235,74 @@ export async function updateAssignmentStatus(assignmentId: string, status: strin
   }
 
   return { success: !error, error: error?.message };
+}
+
+export async function verifyAndDeliverAssignment(assignmentId: string, pinInput: string) {
+  const supabase = await getSupabaseServerClientWithCookies();
+  if (!supabase) return { success: false, error: "Supabase no configurado" };
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Debes iniciar sesión." };
+
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("user_id, disabled_at")
+    .eq("user_id", user.id)
+    .is("disabled_at", null)
+    .maybeSingle();
+
+  if (!adminRow) return { success: false, error: "No tienes permisos de administrador." };
+
+  const pin = (pinInput || "").trim();
+  if (!pin) return { success: false, error: "Debes ingresar el PIN de entrega." };
+
+  const { data: assignment, error: assignmentErr } = await supabase
+    .from("delivery_assignments")
+    .select("id, order_id, vehicle_id, drone_id, status, orders(id, delivery_pin, delivery_pin_verified)")
+    .eq("id", assignmentId)
+    .maybeSingle();
+
+  if (assignmentErr || !assignment) {
+    return { success: false, error: assignmentErr?.message || "No se encontró la asignación." };
+  }
+
+  const orderRel = Array.isArray(assignment.orders) ? assignment.orders[0] : assignment.orders;
+  if (!orderRel) return { success: false, error: "No se encontró la orden asociada." };
+
+  const expectedPin = (orderRel.delivery_pin || "").trim();
+  if (!expectedPin) return { success: false, error: "Esta orden no tiene PIN configurado." };
+
+  if (pin !== expectedPin) {
+    return { success: false, error: "PIN incorrecto. Verifica e intenta de nuevo." };
+  }
+
+  const now = new Date().toISOString();
+
+  const { error: assignmentUpdateErr } = await supabase
+    .from("delivery_assignments")
+    .update({ status: "delivered", delivered_at: now })
+    .eq("id", assignmentId);
+
+  if (assignmentUpdateErr) return { success: false, error: assignmentUpdateErr.message };
+
+  const { error: orderUpdateErr } = await supabase
+    .from("orders")
+    .update({
+      status: "delivered",
+      fulfillment_status: "delivered",
+      delivery_pin_verified: true,
+      updated_at: now,
+    })
+    .eq("id", assignment.order_id);
+
+  if (orderUpdateErr) return { success: false, error: orderUpdateErr.message };
+
+  if (assignment.drone_id) {
+    await supabase.from("drones").update({ status: "available" }).eq("id", assignment.drone_id);
+  }
+  if (assignment.vehicle_id) {
+    await supabase.from("delivery_vehicles").update({ is_available: true }).eq("id", assignment.vehicle_id);
+  }
+
+  return { success: true };
 }

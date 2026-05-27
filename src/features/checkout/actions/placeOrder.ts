@@ -2,7 +2,7 @@
 
 import { getSupabaseServerClientWithCookies } from "@/src/lib/supabase/ssr";
 import { sendOrderConfirmationEmail } from "@/src/lib/email/resend";
-import { sendDeliveryPinSms } from "@/src/lib/sms/mockSms";
+import { sendDeliveryPinSms } from "@/src/lib/sms";
 import { accrueLoyaltyPoints } from "@/src/features/loyalty/server/actions";
 import { assignDelivery } from "@/src/features/logistics/server/actions";
 import { calculateShippingQuote } from "../lib/shipping";
@@ -173,7 +173,7 @@ export async function createOrder({ items, email, address, paymentProvider = "ma
 
         // SMS mock delivery PIN
         try {
-            await sendDeliveryPinSms(address.phone, orderId, deliveryPin);
+            await sendDeliveryPinSms(address.phone, orderId, deliveryPin, "processing");
         } catch {
             // SMS is best-effort/mock for prototype
         }

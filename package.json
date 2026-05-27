@@ -32,7 +32,8 @@
     "react-leaflet": "^5.0.0",
     "recharts": "^3.7.0",
     "resend": "^6.9.4",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "twilio": "^6.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

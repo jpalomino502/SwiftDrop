@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { getSupabaseServerClient } from "@/src/lib/supabase/server";
 import { EpaycoCheckoutForm } from "@/src/features/payments/ui/EpaycoCheckoutForm";
 
@@ -34,7 +35,11 @@ export default async function EpaycoSimulatePage({ params }: PageProps) {
   // ePayco credentials from env
   const publicKey = process.env.EPAYCO_PUBLIC_KEY ?? "";
   const isTest = process.env.EPAYCO_TEST === "true";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const headerStore = await headers();
+  const forwardedProto = headerStore.get("x-forwarded-proto") ?? "http";
+  const forwardedHost = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const requestSiteUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : null;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? requestSiteUrl ?? "http://localhost:3000";
 
   if (!publicKey) {
     return (

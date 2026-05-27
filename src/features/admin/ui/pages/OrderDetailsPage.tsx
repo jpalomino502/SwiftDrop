@@ -46,6 +46,8 @@ type OrderRow = {
     id: string;
     order_number: number;
     status: string;
+    delivery_pin: string | null;
+    delivery_pin_verified: boolean;
     payment_status: string;
     fulfillment_status: string;
     subtotal_cents: number;
@@ -115,7 +117,7 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
                 supabase
                     .from("orders")
                     .select(
-                        "id,order_number,status,payment_status,fulfillment_status,subtotal_cents,shipping_cents,tax_cents,discount_cents,total_cents,created_at,placed_at,email,customer:customers(id,full_name,email,phone),order_items(id,title,sku,image_url,quantity,unit_price_cents,line_total_cents),order_addresses(type,name,phone,line1,line2,city,region,postal_code,country)",
+                        "id,order_number,status,delivery_pin,delivery_pin_verified,payment_status,fulfillment_status,subtotal_cents,shipping_cents,tax_cents,discount_cents,total_cents,created_at,placed_at,email,customer:customers(id,full_name,email,phone),order_items(id,title,sku,image_url,quantity,unit_price_cents,line_total_cents),order_addresses(type,name,phone,line1,line2,city,region,postal_code,country)",
                     )
                     .eq("id", params.id)
                     .single(),
@@ -356,6 +358,14 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
                             <div className="flex items-center gap-3 text-gray-600">
                                 <span className="w-20 text-gray-400">Teléfono</span>
                                 <span>{order.customer?.[0]?.phone || shipping?.phone || "-"}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-gray-600">
+                                <span className="w-20 text-gray-400">PIN</span>
+                                <span className="font-medium tracking-widest">{order.delivery_pin || "-"}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-gray-600">
+                                <span className="w-20 text-gray-400">Verificado</span>
+                                <span>{order.delivery_pin_verified ? "Sí" : "No"}</span>
                             </div>
                         </div>
                     </div>

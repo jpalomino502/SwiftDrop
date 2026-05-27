@@ -1,87 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SwiftDrop — Prototipo de E-commerce Dropshipping con Logística Multimodal
 
-## Getting Started
+Este es un proyecto [Next.js](https://nextjs.org) con App Router, React 19, TypeScript, Supabase/PostgreSQL y despliegue en Vercel.
 
-First, run the development server:
+## Stack Tecnológico
+
+- Next.js 16.1.6 (App Router)
+- React 19.2.4
+- TypeScript 5
+- Tailwind CSS v4
+- HeroUI
+- Supabase (Auth + PostgreSQL + Storage)
+- Framer Motion
+- Recharts
+- jsPDF + jspdf-autotable
+- Leaflet + react-leaflet
+- Resend (email)
+
+## Dependencias
+
+```bash
+npm install
+```
+
+## Variables de entorno
+
+Crea `.env.local` con:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
+RESEND_API_KEY=tu-api-key        # opcional
+RESEND_FROM_EMAIL=SwiftDrop <onboarding@tribunanoventa.shop>
+NEXT_PUBLIC_SITE_URL=https://www.tribunanoventa.shop
+
+# ePayco (opcional — el proyecto funciona en modo mock/simulado sin credenciales reales)
+# EPAYCO_PUBLIC_KEY=
+# EPAYCO_PRIVATE_KEY=
+# EPAYCO_P_KEY=
+# EPAYCO_TEST=true
+
+# SMS (opcional — el proyecto usa mock por defecto)
+# SMS_PROVIDER=mock
+# TWILIO_ACCOUNT_SID=
+# TWILIO_AUTH_TOKEN=
+# TWILIO_FROM_NUMBER=
+```
+
+## Base de datos (Supabase)
+
+1. Ve a Supabase SQL Editor.
+2. Ejecuta en orden:
+   1. `database/schema.sql`
+   2. `database/migrations/20260321_checkout_hardening.sql`
+   3. `database/migrations/20260430_initial_product_data.sql`
+   4. `database/migrations/20260526_add_delivery_pin_columns.sql`
+   5. `database/migrations/20260526_add_customer_type.sql`
+   6. `database/migrations/20260526_add_loyalty_tables.sql`
+   7. `database/migrations/20260526_add_sms_notifications.sql`
+   8. `database/migrations/20260526_add_epayco_provider.sql`
+   9. `database/migrations/20260526_add_drones_tables.sql`
+   10. `database/migrations/20260526_add_logistics_tables.sql`
+   11. `database/migrations/20260526_seed_demo_data.sql`
+3. Verifica tablas en Database → Tables.
+
+## Cómo correr
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-## Supabase (Auth)
+## Qué está implementado
 
-This project uses Supabase for login/registro.
+### Sprint 1 — Base
+- Auth Supabase (login/registro)
+- Panel admin protegido con roles (owner/admin/staff)
+- RLS en todas las tablas
 
-Add these variables to your `.env.local` (you said you’ll fill values later):
+### Sprint 2 — E-commerce Core
+- Catálogo de 24 productos con 41 SKUs desde BD
+- Carrito (localStorage)
+- Checkout con creación transaccional de pedidos (RPC)
+- Perfil de usuario con direcciones CRUD
+- Diferenciación minorista/mayorista (`customer_type`)
+- Programa de fidelización: acumulación de puntos por compra
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+### Sprint 3 — Pagos, Pedidos y Comunicaciones
+- Pedidos con estados y detalle
+- PIN de entrega generado automáticamente
+- SMS mock: guarda intento de envío en tabla `sms_notifications` (simulado para prototipo)
+- ePayco Sandbox simulado: permite elegir "ePayco Sandbox (simulado)" en checkout
+- Factura PDF simulada con NIT y resolución DIAN simulada (sin validez fiscal)
+- Email de confirmación con Resend
 
-### Database schema (Supabase Postgres)
+### Sprint 4 — Logística, Drones y GPS
+- Drones simulados: tabla, estado, batería, carga máxima
+- Mantenimiento de drones: historial y registro
+- Alertas de mantenimiento/batería
+- Logística multimodal: asignación automática por drone, moto o bicicleta según peso/distancia/disponibilidad
+- GPS simulado: coordenadas generadas entre origen (Bucaramanga) y destino
+- Mapa interactivo con Leaflet en tracking
+- Seguimiento de pedido por número con progreso
+- Admin de drones y admin de logística
 
-The full ecommerce schema lives in [database/schema.sql](database/schema.sql).
+## Qué está simulado (prototipo académico)
 
-How to apply it:
+- **Drones**: 100% simulados, sin hardware real.
+- **GPS**: Coordenadas generadas algorítmicamente, no GPS real.
+- **SMS**: Servicio mock que guarda en BD. Sin Twilio real por defecto.
+- **ePayco**: Sin SDK real. Simula checkout y confirmación internamente.
+- **Factura**: PDF simple sin validez fiscal ni conexión DIAN real.
+- **Asignación logística**: Algoritmo simple basado en peso/distancia/disponibilidad.
 
-1. Create a Supabase project.
-2. Go to **SQL Editor** → run the contents of [database/schema.sql](database/schema.sql).
-3. Verify tables under **Database → Tables** (public schema).
+## Rutas importantes
 
-Notes:
+- `/` — Home / Catálogo
+- `/catalog` — Catálogo filtrable
+- `/products/[id]` — Detalle de producto
+- `/cart` — Carrito
+- `/checkout` — Checkout (contra entrega o ePayco simulado)
+- `/profile` — Perfil, pedidos, direcciones, puntos
+- `/track-order` — Rastreo de pedido con mapa
+- `/admin` — Dashboard admin
+- `/admin/drones` — Gestión de drones
+- `/admin/logistics` — Logística multimodal
+- `/admin/orders` — Órdenes
+- `/admin/products` — Productos
+- `/admin/inventory` — Inventario
 
-- RLS is enabled across customer data.
-- A trigger creates a `public.customers` row automatically when a user signs up in `auth.users`.
+## Demo rápida
 
-### What’s already working
+1. Regístrate como cliente.
+2. Agrega productos al carrito.
+3. Ve a checkout, elige método de pago.
+4. Completa dirección y confirma.
+5. En `/profile` verás tu pedido y PIN de entrega.
+6. En `/track-order` busca tu número de pedido para ver el mapa.
+7. Inicia sesión como admin (requiere insertar tu user_id en `admin_users`).
+8. En `/admin/drones` y `/admin/logistics` gestiona la flota.
 
-- Auth (Supabase email/password): login + register modal.
-- Header uses real Supabase session (no fake-auth).
-- Profile page:
-	- Personal details (name/phone) saved to `public.customers` + auth user_metadata.
-	- Addresses CRUD against `public.customer_addresses` (create/edit/delete + “default” via DB trigger).
-	- Orders list reads from `public.orders` (when orders exist).
-	- Payments tab lists `public.payment_intents` tied to your orders (when they exist).
+## Créditos
 
-### What’s still pending / mocked
-
-- Checkout flow (creating `orders`, `order_items`, `payment_intents`, `shipments`).
-- Cart is still local (localStorage) and not persisted in `public.carts` / `public.cart_items`.
-- Product catalog currently comes from JSON; it’s not yet DB-driven.
-- Admin section is mostly UI mock; needs real CRUD against the schema + admin role setup.
-
-### Recommended next steps
-
-- Add a seed/import script to load products from `src/features/products/data/products.json` into `public.products` (and optionally variants/categories).
-- Implement “place order” endpoint (server route) that:
-	- gets/creates customer,
-	- creates `orders` + `order_items`,
-	- creates a `payment_intent` in your provider (Stripe/MercadoPago) and stores it in `public.payment_intents`.
-- Add a webhook route to reconcile payment status and set `orders.status`.
-- Decide whether to store payment methods (usually via provider vault, not in DB).
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proyecto académico — SwiftDrop Team.

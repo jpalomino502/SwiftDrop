@@ -67,6 +67,8 @@ export async function sendOrderConfirmationEmail(input: SendOrderConfirmationInp
   const customerName = escapeHtml(input.customerName?.trim() || "Cliente");
   const totalLabel = formatCurrency(input.totalCents, input.currency);
   const orderUrl = `${getSiteUrl()}/order/success/${input.orderId}`;
+  const siteUrl = getSiteUrl();
+  const brandName = "SWIFTDROP";
 
   const rowsHtml = input.items
     .map((item) => {
@@ -86,102 +88,219 @@ export async function sendOrderConfirmationEmail(input: SendOrderConfirmationInp
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Confirmacion de pedido</title>
+      <title>Confirmación de pedido</title>
       <style>
         body {
           margin: 0;
           padding: 0;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: #111111;
-          color: #333333;
+          font-family: Arial, Helvetica, sans-serif;
+          background: #ffffff;
+          color: #111111;
         }
         .wrapper {
           width: 100%;
           table-layout: fixed;
-          background-color: #f4f4f7;
-          padding-bottom: 40px;
+          background: #ffffff;
+          padding: 24px 12px 32px;
         }
         .main {
-          background-color: #ffffff;
           margin: 0 auto;
           width: 100%;
-          max-width: 600px;
+          max-width: 560px;
           border-spacing: 0;
-          border-radius: 12px;
+          border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-          border-top: 6px solid #fbbf24;
+          box-shadow: 0 10px 30px rgba(17, 17, 17, 0.08);
+          background: #ffffff;
+          border: 1px solid #ececec;
         }
         .header {
-          background-color: #000000;
-          padding: 40px 30px;
-          text-align: center;
+          padding: 22px 24px 16px;
+          text-align: left;
+          border-bottom: 1px solid #f0f0f0;
         }
-        .logo {
-          width: 200px;
-          max-width: 100%;
-          height: auto;
-        }
-        .content {
-          padding: 40px 35px;
-          text-align: center;
-        }
-        h2 {
-          margin: 0 0 20px;
-          font-size: 26px;
-          color: #000000;
+        .brand {
+          display: inline-block;
+          color: #111111;
+          font-size: 18px;
           font-weight: 800;
+          letter-spacing: 0.28em;
           text-transform: uppercase;
-          letter-spacing: -0.5px;
         }
-        p {
-          margin: 0 0 20px;
-          font-size: 16px;
+        .hero {
+          padding: 28px 24px 12px;
+        }
+        .eyebrow {
+          display: inline-block;
+          margin-bottom: 14px;
+          color: #6b7280;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+        h1 {
+          margin: 0 0 14px;
+          font-size: 24px;
+          line-height: 1.1;
+          color: #111111;
+          font-weight: 700;
+          letter-spacing: -0.03em;
+        }
+        .intro {
+          margin: 0;
+          max-width: 100%;
+          font-size: 14px;
           line-height: 1.6;
-          color: #444444;
+          color: #4b5563;
+        }
+        .meta {
+          margin-top: 20px;
+          display: table;
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid #ededed;
+          border-radius: 14px;
+          overflow: hidden;
+        }
+        .meta-row {
+          display: table-row;
+        }
+        .meta-label,
+        .meta-value {
+          display: table-cell;
+          padding: 12px 14px;
+          border-bottom: 1px solid #ededed;
+        }
+        .meta-label {
+          width: 40%;
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #6b7280;
+          background: #fafafa;
+        }
+        .meta-value {
+          font-size: 14px;
+          color: #111111;
+          font-weight: 600;
+        }
+        .meta-row:last-child .meta-label,
+        .meta-row:last-child .meta-value {
+          border-bottom: none;
+        }
+        .cta-wrap {
+          padding: 10px 24px 18px;
         }
         .button {
-          background-color: #fbbf24;
-          color: #000000 !important;
-          padding: 16px 40px;
+          background: #111111;
+          color: #ffffff !important;
+          padding: 12px 22px;
           text-decoration: none;
-          border-radius: 8px;
-          font-weight: 900;
+          border-radius: 999px;
+          font-weight: 700;
           display: inline-block;
-          font-size: 16px;
+          font-size: 12px;
+          letter-spacing: 0.12em;
+          border: 1px solid #111111;
+        }
+        .panel {
+          margin: 0 24px;
+          border-radius: 14px;
+          border: 1px solid #ededed;
+          background: #fbfbfb;
+          overflow: hidden;
+        }
+        .panel-head {
+          padding: 12px 16px;
+          background: #f5f5f5;
+          color: #111111;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
-          border-bottom: 4px solid #d97706;
+          border-bottom: 1px solid #ededed;
         }
-        .summary {
-          background-color: #f9fafb;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 14px;
-          margin: 18px 0 20px;
+        .panel-body {
+          padding: 0 16px;
+        }
+        .item-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+        }
+        .item-table th {
           text-align: left;
+          padding: 12px 0 10px;
+          color: #6b7280;
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          border-bottom: 1px solid #e5e7eb;
         }
-        .accent-bar {
-          height: 8px;
-          background: linear-gradient(90deg, #fbbf24 0%, #22c55e 100%);
+        .item-table td {
+          padding: 12px 0;
+          border-bottom: 1px solid #eef0f2;
+          color: #111111;
         }
-        .table-wrap {
-          text-align: left;
-          margin-top: 18px;
+        .item-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .item-name {
+          font-weight: 600;
+        }
+        .item-qty,
+        .item-total {
+          text-align: right;
+          white-space: nowrap;
+        }
+        .notice {
+          margin: 18px 24px 0;
+          color: #6b7280;
+          font-size: 12px;
+          line-height: 1.6;
+          text-align: center;
         }
         .footer {
-          padding: 30px;
+          padding: 18px 24px 28px;
           text-align: center;
-          font-size: 13px;
-          color: #666666;
-          background-color: #f9fafb;
-          border-top: 1px solid #eeeeee;
+          font-size: 11px;
+          color: #6b7280;
+        }
+        .footer a {
+          color: #111111;
+          text-decoration: none;
+          font-weight: 700;
         }
         @media only screen and (max-width: 600px) {
-          .content {
-            padding: 30px 20px;
+          .wrapper {
+            padding: 10px 8px 18px;
           }
-          h2 {
+          h1 {
             font-size: 22px;
+          }
+          .meta,
+          .meta-row,
+          .meta-label,
+          .meta-value {
+            display: block;
+            width: 100%;
+          }
+          .meta-label {
+            border-bottom: none;
+            padding-bottom: 4px;
+          }
+          .meta-value {
+            padding-top: 0;
+            padding-bottom: 12px;
+          }
+          .panel,
+          .notice,
+          .footer,
+          .cta-wrap,
+          .hero {
+            padding-left: 16px;
+            padding-right: 16px;
           }
         }
       </style>
@@ -189,48 +308,67 @@ export async function sendOrderConfirmationEmail(input: SendOrderConfirmationInp
     <body>
       <center class="wrapper">
         <table class="main" width="100%">
-          <tr><td class="accent-bar"></td></tr>
           <tr>
             <td class="header">
-              <a href="${getSiteUrl()}" target="_blank" rel="noopener noreferrer">
-                <img src="${getSiteUrl()}/logo.png" alt="SwiftDrop" class="logo" />
+              <a href="${siteUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+                <span class="brand">${brandName}</span>
               </a>
             </td>
           </tr>
           <tr>
-            <td class="content">
-              <h2>Pedido confirmado</h2>
-              <p>Hola ${customerName}, recibimos tu compra y la estamos preparando.</p>
+            <td class="hero">
+              <span class="eyebrow">Pedido confirmado</span>
+              <h1>Hola ${customerName}, ya recibimos tu compra.</h1>
+              <p class="intro">Te dejamos el resumen esencial del pedido y el acceso para seguirlo.</p>
 
-              <div class="summary">
-                <p style="margin:0 0 8px;"><strong>Pedido:</strong> ${orderLabel}</p>
-                <p style="margin:0;"><strong>Total:</strong> ${totalLabel}</p>
+              <div class="meta">
+                <div class="meta-row">
+                  <div class="meta-label">Pedido</div>
+                  <div class="meta-value">${orderLabel}</div>
+                </div>
+                <div class="meta-row">
+                  <div class="meta-label">Total</div>
+                  <div class="meta-value">${totalLabel}</div>
+                </div>
               </div>
-
+            </td>
+          </tr>
+          <tr>
+            <td class="cta-wrap">
               <a href="${orderUrl}" class="button" target="_blank" rel="noopener noreferrer">Ver mi pedido</a>
-
-              <div class="table-wrap">
-                <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                  <thead>
-                    <tr>
-                      <th style="text-align:left;padding:8px 0;border-bottom:1px solid #d1d5db;">Producto</th>
-                      <th style="text-align:center;padding:8px 0;border-bottom:1px solid #d1d5db;">Cant.</th>
-                      <th style="text-align:right;padding:8px 0;border-bottom:1px solid #d1d5db;">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${rowsHtml}
-                  </tbody>
-                </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="panel">
+                <div class="panel-head">Resumen de artículos</div>
+                <div class="panel-body">
+                  <table class="item-table">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th class="item-qty">Cant.</th>
+                        <th class="item-total">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rowsHtml}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-
-              <p style="font-size: 13px; color: #777777; margin-top: 20px;">Si no reconoces este pedido, responde este correo.</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="notice">
+                Si no reconoces este pedido, responde este correo.
+              </div>
             </td>
           </tr>
           <tr>
             <td class="footer">
-              <p style="margin:0 0 8px;">&copy; 2026 SwiftDrop. Todos los derechos reservados.</p>
-              <p style="margin:0;">Gracias por comprar con nosotros.</p>
+              <p style="margin:0;">&copy; 2026 SwiftDrop</p>
             </td>
           </tr>
         </table>

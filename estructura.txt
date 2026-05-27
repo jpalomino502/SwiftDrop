@@ -1,0 +1,307 @@
+.
+├── README.md
+├── app
+│   ├── (storefront)
+│   │   ├── StorefrontShell.client.tsx
+│   │   ├── about
+│   │   │   └── page.tsx
+│   │   ├── blog
+│   │   │   └── page.tsx
+│   │   ├── cart
+│   │   │   └── page.tsx
+│   │   ├── catalog
+│   │   │   └── page.tsx
+│   │   ├── checkout
+│   │   │   └── page.tsx
+│   │   ├── faq
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── legal
+│   │   │   ├── privacy
+│   │   │   │   └── page.tsx
+│   │   │   └── terms
+│   │   │       └── page.tsx
+│   │   ├── order
+│   │   │   └── success
+│   │   │       └── [id]
+│   │   │           └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── products
+│   │   │   └── [id]
+│   │   │       └── page.tsx
+│   │   ├── profile
+│   │   │   ├── orders
+│   │   │   │   └── [id]
+│   │   │   │       └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── track-order
+│   │   │   └── page.tsx
+│   │   └── wishlist
+│   │       └── page.tsx
+│   ├── admin
+│   │   ├── categories
+│   │   │   └── page.tsx
+│   │   ├── customers
+│   │   │   ├── [id]
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── inventory
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── loading.tsx
+│   │   ├── orders
+│   │   │   ├── [id]
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── products
+│   │   │   ├── [id]
+│   │   │   │   └── page.tsx
+│   │   │   ├── new
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── promotions
+│   │   │   └── page.tsx
+│   │   └── settings
+│   │       └── page.tsx
+│   ├── api
+│   │   └── products
+│   │       └── route.ts
+│   ├── auth
+│   │   └── admin
+│   │       └── page.tsx
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   └── providers.tsx
+├── database
+│   ├── MIGRATIONS_README.md
+│   ├── migrations
+│   │   ├── 20260321_checkout_hardening.sql
+│   │   ├── 20260430_backfill_legacy_product_ids.sql
+│   │   ├── 20260430_initial_product_data.sql
+│   │   └── 20260504_update_images.sql
+│   ├── schema.sql
+│   └── storage_product_images.sql
+├── docs
+│   ├── ARCHITECTURE.md
+│   └── PROJECT_ANALYSIS.md
+├── eslint.config.mjs
+├── estructura.txt
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── proxy.ts
+├── public
+│   ├── assets
+│   │   └── banner.jpeg
+│   ├── favicon
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon-96x96.png
+│   │   ├── favicon.ico
+│   │   ├── favicon.svg
+│   │   ├── site.webmanifest
+│   │   ├── web-app-manifest-192x192.png
+│   │   └── web-app-manifest-512x512.png
+│   ├── logo.png
+│   └── placeholder.svg
+├── scripts
+│   └── dev.js
+├── src
+│   ├── features
+│   │   ├── README.md
+│   │   ├── about
+│   │   │   ├── README.md
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       ├── pages
+│   │   │       │   └── AboutPage.tsx
+│   │   │       └── sections
+│   │   │           ├── AboutHero.tsx
+│   │   │           ├── ContactCta.tsx
+│   │   │           ├── ImpactSection.tsx
+│   │   │           ├── MissionSection.tsx
+│   │   │           ├── StorySection.tsx
+│   │   │           ├── TeamSection.tsx
+│   │   │           └── TechSection.tsx
+│   │   ├── admin
+│   │   │   ├── server
+│   │   │   │   └── access.ts
+│   │   │   └── ui
+│   │   │       ├── client
+│   │   │       │   ├── slugify.ts
+│   │   │       │   └── useAdminAccess.ts
+│   │   │       ├── components
+│   │   │       │   ├── ColorPicker.tsx
+│   │   │       │   ├── MetricCard.tsx
+│   │   │       │   └── StatusBadge.tsx
+│   │   │       ├── layout
+│   │   │       │   ├── AdminLayout.tsx
+│   │   │       │   ├── Header.tsx
+│   │   │       │   └── Sidebar.tsx
+│   │   │       └── pages
+│   │   │           ├── AdminLoginPage.tsx
+│   │   │           ├── CategoriesPage.tsx
+│   │   │           ├── CustomerProfilePage.tsx
+│   │   │           ├── CustomersPage.tsx
+│   │   │           ├── DashboardPage.tsx
+│   │   │           ├── InventoryPage.tsx
+│   │   │           ├── OrderDetailsPage.tsx
+│   │   │           ├── OrdersPage.tsx
+│   │   │           ├── ProductEditorPage.tsx
+│   │   │           ├── ProductsPage.tsx
+│   │   │           ├── PromotionsPage.tsx
+│   │   │           └── SettingsPage.tsx
+│   │   ├── auth
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       └── AuthModal.client.tsx
+│   │   ├── blog
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       ├── components
+│   │   │       │   └── BlogCard.tsx
+│   │   │       └── pages
+│   │   │           └── BlogPage.tsx
+│   │   ├── cart
+│   │   │   ├── domain
+│   │   │   │   └── CartItem.ts
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       ├── client
+│   │   │       │   ├── CartDrawer.client.tsx
+│   │   │       │   └── cartStore.tsx
+│   │   │       └── pages
+│   │   │           └── CartPage.client.tsx
+│   │   ├── checkout
+│   │   │   ├── actions
+│   │   │   │   ├── getCustomerAddress.ts
+│   │   │   │   └── placeOrder.ts
+│   │   │   ├── lib
+│   │   │   │   └── shipping.ts
+│   │   │   └── ui
+│   │   │       ├── components
+│   │   │       │   └── CheckoutAuth.client.tsx
+│   │   │       └── pages
+│   │   │           └── CheckoutPage.client.tsx
+│   │   ├── faq
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       └── pages
+│   │   │           └── FaqPage.tsx
+│   │   ├── home
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       ├── components
+│   │   │       │   ├── OrderSuccessActions.tsx
+│   │   │       │   ├── ProductCard.tsx
+│   │   │       │   └── QuickViewProductCard.tsx
+│   │   │       ├── pages
+│   │   │       │   └── HomePage.tsx
+│   │   │       └── sections
+│   │   │           ├── BenefitsSection.tsx
+│   │   │           ├── BestSellersSection.tsx
+│   │   │           ├── BrandManifesto.tsx
+│   │   │           ├── FeaturedProductsSection.tsx
+│   │   │           ├── FinalCtaSection.tsx
+│   │   │           ├── HomeHero.tsx
+│   │   │           └── LookbookSection.tsx
+│   │   ├── legal
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       ├── components
+│   │   │       │   └── LegalLayout.tsx
+│   │   │       └── pages
+│   │   │           ├── PrivacyPage.tsx
+│   │   │           └── TermsPage.tsx
+│   │   ├── products
+│   │   │   ├── components
+│   │   │   │   └── QuickViewModal.tsx
+│   │   │   ├── data
+│   │   │   │   └── products.json
+│   │   │   ├── details
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── server
+│   │   │   │   │   └── getProductById.ts
+│   │   │   │   └── ui
+│   │   │   │       ├── client
+│   │   │   │       │   └── ProductDetailClient.tsx
+│   │   │   │       └── pages
+│   │   │   │           └── ProductDetailPage.tsx
+│   │   │   ├── domain
+│   │   │   │   └── Product.ts
+│   │   │   ├── index.ts
+│   │   │   ├── listing
+│   │   │   │   ├── index.ts
+│   │   │   │   └── ui
+│   │   │   │       ├── client
+│   │   │   │       │   └── CatalogClientPage.tsx
+│   │   │   │       ├── components
+│   │   │   │       │   ├── filters
+│   │   │   │       │   │   ├── CatalogFiltersMobileModal.tsx
+│   │   │   │       │   │   └── CatalogFiltersSidebar.tsx
+│   │   │   │       │   ├── product
+│   │   │   │       │   │   └── ProductCard.tsx
+│   │   │   │       │   ├── products
+│   │   │   │       │   │   └── CatalogProductsSection.tsx
+│   │   │   │       │   ├── sections
+│   │   │   │       │   │   └── CatalogHero.tsx
+│   │   │   │       │   └── toolbar
+│   │   │   │       │       └── CatalogToolbar.tsx
+│   │   │   │       ├── lib
+│   │   │   │       │   └── smartSearch.ts
+│   │   │   │       ├── pages
+│   │   │   │       │   └── CatalogPage.tsx
+│   │   │   │       └── types.ts
+│   │   │   └── server
+│   │   │       └── getProducts.ts
+│   │   ├── profile
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       └── pages
+│   │   │           └── ProfilePage.client.tsx
+│   │   ├── tracking
+│   │   │   ├── index.ts
+│   │   │   └── ui
+│   │   │       └── pages
+│   │   │           └── TrackingPage.tsx
+│   │   └── wishlist
+│   │       ├── domain
+│   │       │   └── WishlistItem.ts
+│   │       ├── index.ts
+│   │       └── ui
+│   │           ├── client
+│   │           │   └── wishlistStore.tsx
+│   │           └── pages
+│   │               └── WishlistPage.client.tsx
+│   ├── lib
+│   │   ├── README.md
+│   │   ├── email
+│   │   │   └── resend.ts
+│   │   ├── seo.ts
+│   │   ├── supabase
+│   │   │   ├── browser.ts
+│   │   │   ├── server.ts
+│   │   │   └── ssr.ts
+│   │   └── utils.ts
+│   └── shared
+│       ├── README.md
+│       └── presentation
+│           ├── styles
+│           │   ├── globals.css
+│           │   └── hero.ts
+│           └── ui
+│               ├── AnnouncementBar.tsx
+│               ├── ProgressBar.tsx
+│               ├── SiteFooter.tsx
+│               ├── SiteHeader.tsx
+│               ├── SmoothScroll.client.tsx
+│               ├── formatCurrency.ts
+│               ├── index.ts
+│               └── product
+│                   ├── ProductHeroCard.tsx
+│                   └── ProductTileCard.tsx
+└── tsconfig.json
+
+127 directories, 178 files

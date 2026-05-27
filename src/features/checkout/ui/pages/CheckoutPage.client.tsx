@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@heroui/react";
@@ -36,6 +36,12 @@ export function CheckoutPage() {
     // Auth state
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+    // Payment & promos
+    const [paymentProvider, setPaymentProvider] = useState<"manual" | "epayco">("manual");
+    const [promoCode, setPromoCode] = useState("");
+    const [appliedPromo, setAppliedPromo] = useState<{ type: string; value?: number; value_cents?: number } | null>(null);
+    const [promoError, setPromoError] = useState("");
 
     const [address, setAddress] = useState<Address>({
         name: "",
@@ -98,6 +104,7 @@ export function CheckoutPage() {
         loadAddress();
     }, [isAuthenticated]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAuthSuccess = (user: any, details?: { name: string; phone: string; email: string }) => {
         setIsAuthenticated(true);
         if (details) {
@@ -114,6 +121,44 @@ export function CheckoutPage() {
         const { name, value } = e.target;
         setAddress((prev) => ({ ...prev, [name]: value }));
     };
+
+    async function applyPromoCode() {
+        setPromoError("");
+        if (!promoCode.trim()) return;
+        const supabase = getSupabaseBrowserClient();
+        if (!supabase) return;
+        const { data } = await supabase
+            .from("promotions")
+            .select("type, value_percent, value_cents, active, starts_at, ends_at")
+            .eq("code", promoCode.trim())
+            .maybeSingle();
+        if (!data || !data.active) {
+            setPromoError("Código no válido o inactivo.");
+            setAppliedPromo(null);
+            return;
+        }
+        const now = new Date();
+        if (data.starts_at && new Date(data.starts_at) > now) {
+            setPromoError("El código aún no está activo.");
+            return;
+        }
+        if (data.ends_at && new Date(data.ends_at) < now) {
+            setPromoError("El código ha expirado.");
+            return;
+        }
+        setAppliedPromo({ type: data.type, value: data.value_percent, value_cents: data.value_cents });
+    }
+
+    const discountCents = useMemo(() => {
+        if (!appliedPromo) return 0;
+        if (appliedPromo.type === "percent" && appliedPromo.value) {
+            return Math.floor(subtotal * (appliedPromo.value / 100));
+        }
+        if (appliedPromo.type === "fixed" && appliedPromo.value_cents) {
+            return Math.min(subtotal, appliedPromo.value_cents);
+        }
+        return 0;
+    }, [appliedPromo, subtotal]);
 
     const handleUseMyLocation = async () => {
         setGeoLoading(true);
@@ -148,6 +193,7 @@ export function CheckoutPage() {
                     country: data.address.country_code?.toUpperCase() || "CO",
                 }));
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("[v0] Error getting location:", {
                 code: error.code,
@@ -202,14 +248,23 @@ export function CheckoutPage() {
             };
 
             console.log("[Checkout] Submitting order...", orderData);
-            const result = await createOrder(orderData);
+            const result = await createOrder({
+                ...orderData,
+                paymentProvider,
+                appliedDiscountCents: discountCents,
+                redeemedPoints: 0,
+                promoCode: appliedPromo ? promoCode : undefined,
+            });
             console.log("[Checkout] createOrder result:", result);
 
             if (result.success && result.orderId) {
                 setOrderSuccess(true);
-                console.log("[Checkout] Order created successfully, redirecting to:", `/order/success/${result.orderId}`);
                 clear();
-                router.push(`/order/success/${result.orderId}`);
+                if (result.paymentProvider === "epayco") {
+                    router.push(`/checkout/epayco-simulate/${result.orderId}`);
+                } else {
+                    router.push(`/order/success/${result.orderId}`);
+                }
             } else {
                 console.error("[Checkout] Order creation failed:", result);
                 alert(result.error || "Error al crear la orden");
@@ -416,6 +471,68 @@ export function CheckoutPage() {
                                     </div>
                                 </div>
 
+                                {/* Método de pago */}
+                                <div>
+                                    <h2 className="text-xl mb-4">Método de pago</h2>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-black transition-colors">
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="manual"
+                                                checked={paymentProvider === "manual"}
+                                                onChange={() => setPaymentProvider("manual")}
+                                                className="accent-black"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Pago contra entrega</p>
+                                                <p className="text-xs text-gray-500">Paga en efectivo al recibir tu pedido</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-black transition-colors">
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value="epayco"
+                                                checked={paymentProvider === "epayco"}
+                                                onChange={() => setPaymentProvider("epayco")}
+                                                className="accent-black"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">ePayco Sandbox (simulado)</p>
+                                                <p className="text-xs text-gray-500">Prototipo: simulación de pasarela de pagos</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Promoción */}
+                                <div>
+                                    <h2 className="text-xl mb-4">Promoción</h2>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={promoCode}
+                                            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                            placeholder="Código promocional"
+                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none text-sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={applyPromoCode}
+                                            className="px-5 py-3 bg-gray-100 rounded-xl text-sm hover:bg-gray-200 transition-colors"
+                                        >
+                                            Aplicar
+                                        </button>
+                                    </div>
+                                    {promoError && <p className="text-xs text-red-500 mt-2">{promoError}</p>}
+                                    {appliedPromo && (
+                                        <p className="text-xs text-green-600 mt-2">
+                                            Descuento aplicado: {appliedPromo.type === "percent" ? `${appliedPromo.value}%` : formatCOP(appliedPromo.value_cents ?? 0)}
+                                        </p>
+                                    )}
+                                </div>
+
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
@@ -478,6 +595,12 @@ export function CheckoutPage() {
                                         <span className="text-gray-600">Subtotal</span>
                                         <span>{formatCOP(subtotal)}</span>
                                     </div>
+                                    {discountCents > 0 && (
+                                        <div className="flex justify-between text-sm text-green-600">
+                                            <span>Descuento</span>
+                                            <span>-{formatCOP(discountCents)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Envío</span>
                                         <span>Se notificará por correo</span>
@@ -486,8 +609,8 @@ export function CheckoutPage() {
                                         Normalmente entre {formatCOP(estimatedShippingMin)} y {formatCOP(estimatedShippingMax)}.
                                     </p>
                                     <div className="flex justify-between text-lg pt-3 border-t border-gray-200">
-                                        <span>Total (sin envío)</span>
-                                        <span>{formatCOP(subtotal)}</span>
+                                        <span>Total estimado</span>
+                                        <span>{formatCOP(Math.max(0, subtotal - discountCents))}</span>
                                     </div>
                                 </div>
                             </div>

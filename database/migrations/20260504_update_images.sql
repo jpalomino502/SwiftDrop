@@ -8,26 +8,26 @@ BEGIN;
 -- 1. BATERÍAS (imágenes genéricas de baterías de carro)
 -- ============================================================================
 
-UPDATE public.product_images SET url = 'https://http2.mlstatic.com/D_NQ_NP_713101-MCO95984260660_102025-O.webp'
+UPDATE public.product_images SET url = 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Car_battery.jpg'
 WHERE product_id = (SELECT id FROM public.products WHERE slug = 'bateria-12v-65ah-bosch') AND position = 0;
 
-UPDATE public.products SET primary_image_url = 'https://http2.mlstatic.com/D_NQ_NP_713101-MCO95984260660_102025-O.webp'
+UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Car_battery.jpg'
 WHERE slug = 'bateria-12v-65ah-bosch';
 
-UPDATE public.products SET primary_image_url = 'https://images.tcdn.com.br/img/img_prod/1039998/180_bateria_excell_evolution_exf_70nd_12v_70ah_com_troca_393_1_17877f74a47856ece6aa1ac369f646b2.jpg'
+UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Car_battery.jpg'
 WHERE slug = 'bateria-12v-70ah-exell';
 
-UPDATE public.products SET primary_image_url = 'https://m.media-amazon.com/images/I/51wTlVFzDKL.jpg'
+UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Car_battery.jpg'
 WHERE slug = 'bateria-12v-55ah-ac';
 
-UPDATE public.products SET primary_image_url = 'https://zaps.gr/wp-content/uploads/2023/10/MRPNS40ENL_1.jpg'
+UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Car_battery.jpg'
 WHERE slug = 'bateria-24v-190ah-heavy';
 
 -- ============================================================================
 -- 2. FRENOS (pastillas y discos)
 -- ============================================================================
 
-UPDATE public.products SET primary_image_url = 'https://m.media-amazon.com/images/I/715-hbRn6FL._AC_UF894,1000_QL80_.jpg'
+UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/4/45/Brake_pads.jpg'
 WHERE slug IN ('pastilla-freno-delant-estd', 'pastilla-freno-delant-sport', 'pastilla-freno-trasera-std');
 
 UPDATE public.products SET primary_image_url = 'https://upload.wikimedia.org/wikipedia/commons/0/05/Disc_brakes.jpg'

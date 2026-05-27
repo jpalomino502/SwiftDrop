@@ -19,6 +19,7 @@ type CustomerRow = {
     status: string;
     created_at: string;
     metadata: unknown;
+    loyalty_points: number | null;
 };
 
 type AddressRow = {

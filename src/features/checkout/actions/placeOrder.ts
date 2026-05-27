@@ -246,7 +246,17 @@ export async function createOrder({ items, email, address }: CreateOrderParams) 
         } catch {
             // ignore email failures in checkout flow
         }
+        // Award loyalty points
+            const { error: pointsError } = await supabase.rpc(
+                "award_order_points",
+                {
+                    p_order_id: orderId,
+                }
+            );
 
+            if (pointsError) {
+                console.error("[LOYALTY_POINTS_ERROR]", pointsError);
+            }
         return { success: true, orderId };
 
     } catch (error: unknown) {

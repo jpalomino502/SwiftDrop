@@ -31,6 +31,7 @@ type CustomerRow = {
   email: string | null;
   full_name: string | null;
   phone: string | null;
+  loyalty_points: number | null;
 };
 
 type AddressRow = {
@@ -233,7 +234,7 @@ export function ProfilePage() {
         // 1) Load or create customer row (trigger should create it, but we keep a safe fallback)
         const { data: existing, error: existingErr } = await supabase
           .from("customers")
-          .select("id,user_id,email,full_name,phone")
+          .select("id,user_id,email,full_name,phone,loyalty_points")
           .eq("user_id", userId)
           .maybeSingle();
 
@@ -251,7 +252,7 @@ export function ProfilePage() {
                   ? session.user.user_metadata.full_name
                   : null,
             })
-            .select("id,user_id,email,full_name,phone")
+            .select("id,user_id,email,full_name,phone,loyalty_points")
             .single();
 
           if (insertErr) throw insertErr;
@@ -452,7 +453,7 @@ export function ProfilePage() {
           phone: profileForm.phone || null,
         })
         .eq("user_id", session.user.id)
-        .select("id,user_id,email,full_name,phone")
+        .select("id,user_id,email,full_name,phone,loyalty_points")
         .single();
 
       if (custErr) throw custErr;
@@ -497,6 +498,17 @@ export function ProfilePage() {
                   {session ? "Mi cuenta" : "Invitado"}
                 </p>
                 <p className="text-xs text-gray-500 mt-2 truncate">{userData.email}</p>
+                <div className="mt-4 border border-gray-100 rounded-2xl p-4 bg-[#fafafa]">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-2">
+                    Puntos
+                  </p>
+
+                  <div className="flex items-end gap-2">
+                    <span className="text-3xl font-light">
+                      {customer?.loyalty_points ?? 0}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 

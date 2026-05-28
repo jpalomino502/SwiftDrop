@@ -59,8 +59,14 @@ export async function GET(req: Request) {
       transactionState =
         (typeof val["x_transaction_state"] === "string" ? val["x_transaction_state"] : "") || transactionState;
       responseText = (typeof val["x_response"] === "string" ? val["x_response"] : "") || responseText;
-      extra1 = (typeof val["extra1"] === "string" ? val["extra1"] : "") || extra1;
-      extra2 = (typeof val["extra2"] === "string" ? val["extra2"] : "") || extra2;
+      extra1 =
+        (typeof val["x_extra1"] === "string" ? val["x_extra1"] : "") ||
+        (typeof val["extra1"] === "string" ? val["extra1"] : "") ||
+        extra1;
+      extra2 =
+        (typeof val["x_extra2"] === "string" ? val["x_extra2"] : "") ||
+        (typeof val["extra2"] === "string" ? val["extra2"] : "") ||
+        extra2;
       responseReasonText =
         (typeof val["x_response_reason_text"] === "string" ? val["x_response_reason_text"] : "") || responseReasonText;
     }
@@ -80,7 +86,26 @@ export async function GET(req: Request) {
     // ignore log errors
   }
 
-  const orderId = extra1;
+  let orderId = extra1;
+
+  // If we still don't have orderId, try to find it in recent callback logs by refPayco
+  if (!orderId && refPayco && supabase) {
+    try {
+      const { data: logRow } = await supabase
+        .from("epayco_callback_logs")
+        .select("order_id")
+        .eq("ref_payco", refPayco)
+        .not("order_id", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (logRow?.order_id) {
+        orderId = logRow.order_id;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   if (!orderId) {
     // We cannot identify the order. Redirect to checking page with ref_payco so it can try to look it up.

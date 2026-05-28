@@ -47,6 +47,12 @@ export default function OrderCheckingPage() {
 
         if (!data.success) {
           setCheckError(data.error || "Error consultando ePayco");
+          if (data.isApproved && !data.orderId) {
+            // Payment approved but we can't identify the order
+            setStatus("error");
+            setMessage("Tu pago fue aprobado, pero no pudimos identificar tu pedido. Contacta soporte con la referencia: " + refPayco);
+            return;
+          }
           // Retry if we haven't reached max attempts
           if (attempts < maxAttempts) {
             setTimeout(checkStatus, 5000);

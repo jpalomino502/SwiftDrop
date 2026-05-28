@@ -112,15 +112,26 @@ export async function GET(req: Request) {
     }
   }
 
+  if (!orderId) {
+    return NextResponse.json({
+      success: false,
+      isApproved,
+      numericCode,
+      responseText,
+      refPayco,
+      error: "No se pudo identificar la orden. Contacta soporte con la referencia: " + refPayco,
+    });
+  }
+
   return NextResponse.json({
     success: true,
     isApproved,
     numericCode,
     responseText,
     refPayco,
-    orderId: orderId || null,
+    orderId,
     redirectUrl: isApproved
-      ? `/order/success/${orderId || ""}?epayco=confirmed&ref=${refPayco}`
-      : `/order/failed?order=${orderId || ""}&reason=epayco_code_${numericCode || "unknown"}`,
+      ? `/order/success/${orderId}?epayco=confirmed&ref=${refPayco}`
+      : `/order/failed?order=${orderId}&reason=epayco_code_${numericCode || "unknown"}`,
   });
 }

@@ -160,6 +160,16 @@ export function CheckoutPage() {
         return 0;
     }, [appliedPromo, subtotal]);
 
+    const shippingQuote = useMemo(() => {
+        return calculateShippingQuote({
+            city: address.city,
+            subtotalCents: subtotal,
+            items: items.map((item) => ({ quantity: item.quantity })),
+        });
+    }, [address.city, subtotal, items]);
+
+    const totalWithShipping = Math.max(0, subtotal + shippingQuote.shippingCents - discountCents);
+
     const handleUseMyLocation = async () => {
         setGeoLoading(true);
         if (!navigator.geolocation) {

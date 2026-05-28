@@ -613,14 +613,24 @@ export function CheckoutPage() {
                                     )}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Envío</span>
-                                        <span>Se notificará por correo</span>
+                                        <span>
+                                            {shippingQuote.isFreeShippingCity
+                                                ? "Gratis"
+                                                : shippingQuote.shippingCents > 0
+                                                    ? formatCOP(shippingQuote.shippingCents)
+                                                    : address.city
+                                                        ? "Calculando..."
+                                                        : `Desde ${formatCOP(estimatedShippingMin)}`}
+                                        </span>
                                     </div>
-                                    <p className="text-xs text-gray-500">
-                                        Normalmente entre {formatCOP(estimatedShippingMin)} y {formatCOP(estimatedShippingMax)}.
-                                    </p>
+                                    {shippingQuote.isFreeShippingCity && (
+                                        <p className="text-xs text-green-600">
+                                            Envío gratis a {address.city}
+                                        </p>
+                                    )}
                                     <div className="flex justify-between text-lg pt-3 border-t border-gray-200">
                                         <span>Total estimado</span>
-                                        <span>{formatCOP(Math.max(0, subtotal - discountCents))}</span>
+                                        <span>{formatCOP(totalWithShipping)}</span>
                                     </div>
                                 </div>
                             </div>

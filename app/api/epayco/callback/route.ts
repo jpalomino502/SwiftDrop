@@ -83,8 +83,11 @@ export async function GET(req: Request) {
   const orderId = extra1;
 
   if (!orderId) {
-    // We cannot identify the order. Redirect to a generic checking page instead of failed.
-    return NextResponse.redirect(new URL("/order/checking?reason=no_order_id", req.url));
+    // We cannot identify the order. Redirect to checking page with ref_payco so it can try to look it up.
+    const checkingUrl = refPayco
+      ? `/order/checking?reason=no_order_id&ref=${encodeURIComponent(refPayco)}`
+      : "/order/checking?reason=no_order_id";
+    return NextResponse.redirect(new URL(checkingUrl, req.url));
   }
 
   // ePayco standard checkout response codes (x_cod_response / x_cod_transaction_state):

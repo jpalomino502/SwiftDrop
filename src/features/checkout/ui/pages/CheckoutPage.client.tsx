@@ -8,7 +8,7 @@ import { createOrder } from "../../actions/placeOrder";
 import { getCustomerAddress } from "../../actions/getCustomerAddress";
 import { useCart } from "@/src/features/cart";
 import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
-import { CheckoutAuth } from "../components/CheckoutAuth.client";
+import { calculateShippingQuote, isFreeShippingCity } from "../../lib/shipping";
 import { formatCOP } from "@/src/shared/presentation/ui";
 
 interface Address {

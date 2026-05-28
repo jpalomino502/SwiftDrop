@@ -63,8 +63,9 @@ export default async function EpaycoSimulatePage({ params }: PageProps) {
     // ignore
   }
 
-  // Amount in COP as stored in the DB (no extra scaling)
-  const amountCOP = typeof order.total_cents === "number" ? order.total_cents : 0;
+  // total_cents is stored as integer cents (e.g. 9000000 = $90,000.00).
+  // ePayco expects the amount in the base currency unit, so we divide by 100.
+  const amountCOP = (typeof order.total_cents === "number" ? order.total_cents : 0) / 100;
 
   const invoiceRef = `ORD-${String(order.order_number).padStart(6, "0")}`;
 

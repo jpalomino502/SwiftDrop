@@ -21,6 +21,8 @@ export async function POST(req: Request) {
   // ePayco webhook fields (can be with or without x_ prefix)
   const refPayco = body.x_ref_payco ?? body.ref_payco ?? "";
   const transactionState = body.x_transaction_state ?? body.transactionState ?? "";
+  const codResponse = body.x_cod_response ?? body.cod_response ?? "";
+  const responseText = body.x_response ?? body.response ?? "";
   const extra1 = body.x_extra1 ?? body.extra1 ?? "";
   const extra2 = body.x_extra2 ?? body.extra2 ?? "";
   const amount = body.x_amount ?? body.amount ?? "";
@@ -38,8 +40,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Database not configured" }, { status: 500 });
   }
 
-  // ePayco state 4 = Approved
-  const isApproved = transactionState === "4" || transactionState.toLowerCase() === "aceptada";
+  // ePayco standard checkout response codes (x_cod_response):
+  // 1 = Aceptada, 2 = Rechazada, 3 = Pendiente, 4 = Fallida, 9 = Expirada, 10 = Anulada, 11 = Reversada
+  // We also support x_response text ("Aceptada") and legacy x_transaction_state for compatibility.
+  const isApproved =
+    codResponse === "1" ||
+    responseText.toLowerCase() === "aceptada" ||
+    transactionState === "1" ||
+    transactionState.toLowerCase() === "aceptada";
 
   // Update order
   await supabase
@@ -68,6 +76,8 @@ export async function POST(req: Request) {
         status: isApproved ? "succeeded" : "failed",
         provider_metadata: {
           ref_payco: refPayco,
+          cod_response: codResponse,
+          response_text: responseText,
           transaction_state: transactionState,
           response_reason: responseReason,
           amount,
@@ -86,6 +96,8 @@ export async function POST(req: Request) {
       currency,
       provider_metadata: {
         ref_payco: refPayco,
+        cod_response: codResponse,
+        response_text: responseText,
         transaction_state: transactionState,
         response_reason: responseReason,
         amount,

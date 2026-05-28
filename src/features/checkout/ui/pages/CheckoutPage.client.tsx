@@ -26,8 +26,8 @@ interface Address {
 export function CheckoutPage() {
     const router = useRouter();
     const { items, subtotal, clear } = useCart();
-    const estimatedShippingMin = 1010000;
-    const estimatedShippingMax = 2810000;
+    const estimatedShippingMin = 10100;
+    const estimatedShippingMax = 28100;
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [geoLoading, setGeoLoading] = useState(false);

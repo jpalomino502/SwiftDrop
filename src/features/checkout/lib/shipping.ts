@@ -73,17 +73,14 @@ export function calculateShippingQuote(input: {
 
   const additionalKg = Math.max(0, chargeableWeightKg - 1);
   const baseTransportCop = BASE_INITIAL_COP + (additionalKg * BASE_ADDITIONAL_COP);
-  const declaredValueCop = Math.round(subtotalCents / 100);
+  const declaredValueCop = subtotalCents;
   const overfreightCop = Math.round(declaredValueCop * OVERFREIGHT_RATE);
 
-  const baseTransportCents = baseTransportCop * 100;
-  const overfreightCents = overfreightCop * 100;
-
   return {
-    shippingCents: baseTransportCents + overfreightCents,
+    shippingCents: baseTransportCop + overfreightCop,
     chargeableWeightKg,
-    baseTransportCents,
-    overfreightCents,
+    baseTransportCents: baseTransportCop,
+    overfreightCents: overfreightCop,
     isFreeShippingCity: false,
     cityNormalized,
   };

@@ -27,7 +27,7 @@ function toStatusLabel(status?: string) {
 function buildDeliveryPinMessage(orderId: string, pin: string, status?: string) {
   const shortOrder = orderId.slice(0, 8).toUpperCase();
   const statusLabel = toStatusLabel(status);
-  return `SwiftDrop: Pedido ${shortOrder} - Estado: ${statusLabel}. PIN de confirmación: ${pin}. Compártelo solo al momento de la entrega.`;
+  return `SwiftDrop: Pedido ${shortOrder} - Estado: ${statusLabel}. Tu PIN de entrega es: ${pin}. Entregalo unicamente al repartidor cuando recibas tu pedido.`;
 }
 
 export async function sendDeliveryPinSms(phone: string, orderId: string, pin: string, status?: string) {

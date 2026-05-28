@@ -1,7 +1,7 @@
 "use client";
 
 import { StatusBadge } from "../components/StatusBadge";
-import { ArrowLeft, MapPin, CreditCard, Calendar, Printer, Download } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Calendar, Printer, Download, RefreshCw, MessageSquare, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { cn, Button } from "@heroui/react";
 
@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/src/lib/supabase/browser";
 import { getAdminBootstrapSql, useAdminAccess } from "../client/useAdminAccess";
 import { formatCOP } from "@/src/shared/presentation/ui";
+import { resendDeliveryPin } from "../../server/actions";
 
 type OrderAddressRow = {
     type: "shipping" | "billing";
@@ -40,6 +41,15 @@ type PaymentIntentRow = {
     status: string;
     amount_cents: number;
     created_at: string;
+};
+
+type SmsNotificationRow = {
+    id: string;
+    phone: string;
+    message: string;
+    status: string;
+    provider: string;
+    sent_at: string | null;
 };
 
 type OrderRow = {
@@ -96,8 +106,11 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
     const access = useAdminAccess();
     const [order, setOrder] = useState<OrderRow | null>(null);
     const [paymentIntents, setPaymentIntents] = useState<PaymentIntentRow[]>([]);
+    const [smsNotifications, setSmsNotifications] = useState<SmsNotificationRow[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>("");
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendMessage, setResendMessage] = useState("");
 
     const timeline = useMemo(() => (order ? buildTimeline(order) : null), [order]);
     const shipping = useMemo(
@@ -113,7 +126,7 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
 
         setLoading(true);
         try {
-            const [{ data, error }, { data: pi, error: piErr }] = await Promise.all([
+            const [{ data, error }, { data: pi, error: piErr }, { data: sms, error: smsErr }] = await Promise.all([
                 supabase
                     .from("orders")
                     .select(
@@ -127,11 +140,19 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
                     .eq("order_id", params.id)
                     .order("created_at", { ascending: false })
                     .limit(5),
+                supabase
+                    .from("sms_notifications")
+                    .select("id,phone,message,status,provider,sent_at")
+                    .eq("order_id", params.id)
+                    .order("sent_at", { ascending: false })
+                    .limit(10),
             ]);
             if (error) throw error;
             if (piErr) throw piErr;
+            if (smsErr) throw smsErr;
             setOrder((data ?? null) as OrderRow | null);
             setPaymentIntents((pi ?? []) as PaymentIntentRow[]);
+            setSmsNotifications((sms ?? []) as SmsNotificationRow[]);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Error cargando orden");
         } finally {

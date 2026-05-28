@@ -21,11 +21,17 @@ async function fetchEpaycoValidation(refPayco: string) {
  * ePayco Standard Checkout — Response URL (p_url_response)
  * ePayco redirects the customer here after payment.
  *
- * ePayco usually sends only ?ref_payco=... in the response URL.
- * We must query their validation API to get the real transaction state.
+ * ePayco may send params directly or only ?ref_payco=... in the response URL.
+ * We query their validation API when needed and fall back gracefully.
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+
+  // Collect every query param for debugging
+  const rawParams: Record<string, string> = {};
+  searchParams.forEach((value, key) => {
+    rawParams[key] = value;
+  });
 
   // ePayco can send params with or without x_ prefix depending on version
   let refPayco = searchParams.get("x_ref_payco") ?? searchParams.get("ref_payco") ?? "";
@@ -36,12 +42,14 @@ export async function GET(req: Request) {
   let extra2 = searchParams.get("x_extra2") ?? searchParams.get("extra2") ?? "";
   let responseReasonText = searchParams.get("x_response_reason_text") ?? searchParams.get("response_reason_text") ?? "";
 
-  // If ePayco only sent ref_payco in the response URL, query their validation API
-  // to get the full transaction details including order id (extra1) and response codes.
+  const supabase = getSupabaseServerClient();
+
+  // If ePayco only sent ref_payco (or we still miss order id / code), query their validation API
+  let validationData: Record<string, unknown> | null = null;
   if (refPayco && (!extra1 || !codResponse)) {
-    const validation = await fetchEpaycoValidation(refPayco);
-    if (validation) {
-      const val = validation;
+    validationData = await fetchEpaycoValidation(refPayco);
+    if (validationData) {
+      const val = validationData;
       codResponse =
         (typeof val["x_cod_transaction_state"] === "string" ? val["x_cod_transaction_state"] : "") ||
         (typeof val["x_cod_response"] === "string" ? val["x_cod_response"] : "") ||
@@ -58,18 +66,36 @@ export async function GET(req: Request) {
     }
   }
 
+  // Persist debug log (best-effort)
+  try {
+    if (supabase) {
+      await supabase.from("epayco_callback_logs").insert({
+        order_id: extra1 || null,
+        ref_payco: refPayco || null,
+        query_params: rawParams,
+        validation_response: validationData,
+      });
+    }
+  } catch {
+    // ignore log errors
+  }
+
   const orderId = extra1;
 
   if (!orderId) {
-    return NextResponse.redirect(new URL("/order/failed?reason=no_order_id", req.url));
+    // We cannot identify the order. Redirect to a generic checking page instead of failed.
+    return NextResponse.redirect(new URL("/order/checking?reason=no_order_id", req.url));
   }
-
-  const supabase = getSupabaseServerClient();
 
   // ePayco standard checkout response codes (x_cod_response / x_cod_transaction_state):
   // 1 = Aceptada, 2 = Rechazada, 3 = Pendiente, 4 = Fallida, 9 = Expirada, 10 = Anulada, 11 = Reversada
   const numericCode = parseInt(codResponse || transactionState, 10);
   const isApproved = numericCode === 1 || responseText.toLowerCase() === "aceptada";
+
+  // If we could not determine the code at all, redirect to checking page instead of marking as failed
+  if (!codResponse && !transactionState && !responseText && !validationData) {
+    return NextResponse.redirect(new URL(`/order/checking?order=${orderId}&ref=${refPayco}`, req.url));
+  }
 
   if (isApproved) {
     if (supabase) {

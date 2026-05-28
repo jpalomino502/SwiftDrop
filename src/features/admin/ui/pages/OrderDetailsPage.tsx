@@ -389,6 +389,34 @@ export function OrderDetailsPage({ params }: { params: { id: string } }) {
                                 <span>{order.delivery_pin_verified ? "Sí" : "No"}</span>
                             </div>
                         </div>
+                        {order.status !== "delivered" && order.status !== "cancelled" && (
+                            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                                <button
+                                    onClick={async () => {
+                                        setResendLoading(true);
+                                        setResendMessage("");
+                                        const result = await resendDeliveryPin(order.id);
+                                        setResendLoading(false);
+                                        if (result.success) {
+                                            setResendMessage("PIN reenviado por SMS.");
+                                            await load();
+                                        } else {
+                                            setResendMessage(`Error: ${result.error || "No se pudo reenviar"}`);
+                                        }
+                                    }}
+                                    disabled={resendLoading}
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-black text-white py-2 text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                                >
+                                    <RefreshCw size={14} className={resendLoading ? "animate-spin" : ""} />
+                                    {resendLoading ? "Enviando…" : "Reenviar PIN por SMS"}
+                                </button>
+                                {resendMessage && (
+                                    <p className={cn("text-xs text-center", resendMessage.startsWith("Error") ? "text-red-600" : "text-green-600")}>
+                                        {resendMessage}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Timeline */}
